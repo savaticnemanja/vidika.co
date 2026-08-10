@@ -1,0 +1,109 @@
+---
+import { SITE, copyrightYears } from '../site.config';
+
+const years = copyrightYears();
+---
+
+<footer class="footer">
+  <p class="footer__text">
+    <span aria-hidden="true">©</span>
+    <span class="visually-hidden">Copyright</span>
+    {years}
+    {SITE.legalName}. All rights reserved.
+  </p>
+
+  <p class="footer__credit">
+    Developed by
+    <a
+      class="footer__credit-link"
+      href="https://nemanjas.dev"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      nemanjas.dev
+      <span class="visually-hidden">(opens in a new tab)</span>
+    </a>
+  </p>
+</footer>
+
+<style>
+  /* In flow, at the true end of the page, sharing the last section's ground
+     rather than reading as a separate block — never floating over a section. */
+  .footer {
+    position: relative;
+    z-index: var(--z-content);
+    display: grid;
+    gap: var(--sp-2);
+    place-items: center;
+    min-height: var(--footer-block);
+    padding-inline: var(--shell-x);
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+  }
+
+  .footer__text {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 300;
+    line-height: 1.4;
+    letter-spacing: var(--tr-wide);
+    color: var(--bone-dim);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .footer__credit {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 300;
+    letter-spacing: var(--tr-wide);
+    color: var(--bone-dim);
+    opacity: 0.68;
+  }
+
+  .footer__credit-link {
+    position: relative;
+    color: inherit;
+    transition: color var(--dur-2) var(--ease-quart);
+  }
+
+  .footer__credit-link::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -2px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transition: transform var(--dur-3) var(--ease-expo);
+  }
+
+  .footer__credit-link:hover,
+  .footer__credit-link:focus-visible {
+    color: var(--gold-lift);
+  }
+
+  .footer__credit-link:hover::after,
+  .footer__credit-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* The legal name wraps to two lines on narrow screens — give it the room. */
+  @media (max-width: 30em) {
+    .footer__text {
+      letter-spacing: var(--tr-tight);
+    }
+  }
+
+  /* Matches the short-viewport tightening in Contact.astro/Field.astro — the
+     credit line's own gap doesn't shrink with vh like the form's margins do. */
+  @media (max-height: 820px) {
+    .footer {
+      gap: 0.2rem;
+    }
+  }
+
+  @media (max-height: 700px) {
+    .footer {
+      gap: 0.1rem;
+    }
+  }
+</style>

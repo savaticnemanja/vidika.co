@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SectionNav from '../components/SectionNav.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+---
+
+<Base>
+  <SiteHeader />
+  <SectionNav />
+
+  <main
+    id="main"
+    class="scroller"
+    tabindex="0"
+    aria-label="VIDIKA — scrollable sections"
+  >
+    <Hero />
+    <About />
+
+    {/* Last section and footer share one snap unit, so the footer scrolls
+        into view with the end of the site rather than following the reader. */}
+    <div class="scroller__end">
+      <Contact />
+      <SiteFooter />
+    </div>
+  </main>
+</Base>
+
+<script>
+  import { initMotion } from '../scripts/motion';
+  import { initForm } from '../scripts/form';
+
+  initMotion();
+  initForm();
+</script>

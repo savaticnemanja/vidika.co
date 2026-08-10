@@ -1,0 +1,337 @@
+---
+import Field from './Field.astro';
+import { CONTACT, SITE } from '../site.config';
+---
+
+<section id="contact" class="panel contact" data-panel="contact" aria-labelledby="contact-title">
+  <div class="contact__inner">
+    <h2 id="contact-title" class="contact__heading" data-reveal="rise">{CONTACT.heading}</h2>
+
+    <span class="contact__rule" data-reveal="rule" style="--reveal-delay:140ms" aria-hidden="true"></span>
+
+    <form
+      class="form"
+      data-contact-form
+      data-endpoint={CONTACT.endpoint}
+      data-mailto={SITE.email}
+      method="post"
+      action={CONTACT.endpoint || `mailto:${SITE.email}`}
+      novalidate
+    >
+      <Field
+        id="contact-name"
+        name="name"
+        label={CONTACT.fields.name.label}
+        maxlength={CONTACT.fields.name.max}
+        autocomplete="name"
+        delay={220}
+      />
+
+      <Field
+        id="contact-email"
+        name="email"
+        type="email"
+        label={CONTACT.fields.email.label}
+        maxlength={CONTACT.fields.email.max}
+        autocomplete="email"
+        inputmode="email"
+        delay={300}
+      />
+
+      <Field
+        id="contact-message"
+        name="message"
+        as="textarea"
+        label={CONTACT.fields.message.label}
+        maxlength={CONTACT.fields.message.max}
+        counter
+        delay={380}
+      />
+
+      {/* Bot trap — off-screen rather than display:none, and never announced. */}
+      <div class="honeypot" aria-hidden="true">
+        <label for="contact-company">Company</label>
+        <input id="contact-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="form__actions" data-reveal="up" style="--reveal-delay:460ms">
+        <button type="submit" class="submit" data-submit>
+          <span class="submit__label" data-submit-label>Send message</span>
+          <svg class="submit__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 12.5 9.5 18 20 7" pathLength="100" />
+          </svg>
+        </button>
+      </div>
+
+      <p class="form__status" role="status" aria-live="polite" data-form-status></p>
+    </form>
+
+    <a class="contact__email" href={`mailto:${SITE.email}`} data-reveal="fade" style="--reveal-delay:560ms">
+      {SITE.email}
+    </a>
+  </div>
+</section>
+
+<style>
+  .contact__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+  }
+
+  .contact__heading {
+    font-size: var(--fs-xl);
+    font-weight: 200;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--bone);
+  }
+
+  .contact__rule {
+    display: block;
+    width: 4.5rem;
+    height: 1px;
+    margin-block: clamp(0.75rem, 2.4vh, 1.5rem);
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 1.4vh, 0.9rem);
+    width: 100%;
+  }
+
+  .honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .form__actions {
+    margin-block-start: clamp(0.35rem, 1.4vh, 0.85rem);
+  }
+
+  /* ── Submit ──────────────────────────────────────────────────────── */
+
+  .submit {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.9rem var(--sp-6);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 300;
+    letter-spacing: var(--tr-wider);
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      color var(--dur-3) var(--ease-quart),
+      border-color var(--dur-3) var(--ease-quart);
+  }
+
+  .submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, var(--gold), var(--gold-lift));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-3) var(--ease-deco);
+  }
+
+  .submit:hover,
+  .submit:focus-visible {
+    color: var(--ink-1000);
+    border-color: var(--gold-lift);
+  }
+
+  .submit:hover::before,
+  .submit:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  .submit:active {
+    scale: 0.99;
+  }
+
+  /* Sending — an indeterminate gold sweep travelling under the label. */
+  .submit[data-state='sending'] {
+    color: var(--gold-lift);
+    cursor: progress;
+  }
+
+  .submit[data-state='sending']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(183 137 55 / 32%) 45%,
+      rgb(214 164 79 / 45%) 50%,
+      rgb(183 137 55 / 32%) 55%,
+      transparent 100%
+    );
+    animation: sweep 1150ms var(--ease-inout) infinite;
+  }
+
+  .submit[data-state='sent'] {
+    color: var(--ink-1000);
+    border-color: var(--gold-lift);
+    cursor: default;
+  }
+
+  .submit[data-state='sent']::before {
+    transform: scaleX(1);
+  }
+
+  .submit:disabled {
+    cursor: not-allowed;
+  }
+
+  .submit__check {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0;
+    transition: opacity var(--dur-1) linear;
+  }
+
+  .submit[data-state='sent'] .submit__check {
+    opacity: 1;
+    animation: draw-check calc(var(--dur-3) * var(--motion)) var(--ease-quart) forwards;
+  }
+
+  .form__status {
+    min-height: 1.2rem;
+    padding-block-start: 0.2rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tr-tight);
+    line-height: 1.35;
+    text-align: center;
+    color: var(--bone-dim);
+  }
+
+  .form__status[data-tone='error'] {
+    color: #e2917f;
+  }
+
+  .form__status[data-tone='success'] {
+    color: var(--gold-lift);
+  }
+
+  .contact__email {
+    position: relative;
+    margin-block-start: clamp(0.5rem, 2vh, 1.25rem);
+    padding-block: 0.35rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-md);
+    font-style: italic;
+    color: var(--bone-soft);
+    transition: color var(--dur-2) var(--ease-quart);
+  }
+
+  /* Underline grows from the centre. */
+  .contact__email::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform var(--dur-3) var(--ease-expo);
+  }
+
+  .contact__email:hover,
+  .contact__email:focus-visible {
+    color: var(--gold-lift);
+  }
+
+  .contact__email:hover::after,
+  .contact__email:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  @keyframes sweep {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes draw-check {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Short viewports (a common laptop window, not just landscape phones) can't
+     fit the form's natural rhythm above the footer band within one screen —
+     tighten the vertical rhythm so the whole section still lands as one
+     viewport instead of pushing the footer past the fold. */
+  @media (max-height: 820px) {
+    .contact__rule {
+      margin-block: clamp(0.4rem, 1.4vh, 0.85rem);
+    }
+
+    .form {
+      gap: clamp(0.3rem, 1vh, 0.6rem);
+    }
+
+    .form__actions {
+      margin-block-start: clamp(0.2rem, 1vh, 0.5rem);
+    }
+
+    .contact__email {
+      margin-block-start: clamp(0.25rem, 1.2vh, 0.65rem);
+    }
+  }
+
+  /* Below the point where global.css relaxes the scroll-snap lock, the form
+     still needs to fit — snap-stop only loosens under 620px, so 700px down
+     to that line is still a hard lock. */
+  @media (max-height: 700px) {
+    .contact__rule {
+      margin-block: clamp(0.3rem, 1vh, 0.6rem);
+    }
+
+    .form {
+      gap: clamp(0.2rem, 0.8vh, 0.4rem);
+    }
+
+    .form__actions {
+      margin-block-start: clamp(0.15rem, 0.8vh, 0.35rem);
+    }
+
+    .contact__email {
+      margin-block-start: clamp(0.2rem, 1vh, 0.45rem);
+    }
+  }
+</style>

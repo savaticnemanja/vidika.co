@@ -1,0 +1,126 @@
+/**
+ * VIDIKA design tokens — Art Deco / geometric, cinematic.
+ *
+ * Two theme colours: the logo gold #b78937 and the brand navy #122238.
+ * The navy drives a single ink ramp (ground → surface → field), the gold is
+ * the only accent. Deliberately single-mode — everything is a custom property,
+ * so a second theme would be a token swap rather than a rewrite.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Ink ─────────────────────────────────────────────────────────── */
+  /* A single navy ramp anchored on #122238: the ground is a deeper shade of
+     it, and the brand navy itself surfaces as the field/blob tone. */
+  --ink-1000: #070d15;
+  --ink-900: #0a131f; /* page ground */
+  --ink-800: #0d1828; /* raised surface */
+  --ink-700: #122238; /* field fill — the brand navy */
+  --ink-600: #182e4c; /* hover / pressed */
+
+  /* ── Gold ────────────────────────────────────────────────────────── */
+  --gold: #b78937; /* brand — 5.9:1 on --ink-900 */
+  --gold-lift: #d6a44f; /* hover, highlights */
+  --gold-deep: #7a5a24; /* shadow side of the metal */
+  --gold-wash: rgb(183 137 55 / 12%);
+
+  /* ── Bone (text) ─────────────────────────────────────────────────── */
+  /* Warm bone against the cool navy — the same warm/cool tension as the gold. */
+  --bone: #ede7db; /* 15.1:1 on --ink-900 */
+  --bone-soft: rgb(237 231 219 / 78%); /* 9.4:1 */
+  --bone-dim: rgb(237 231 219 / 58%); /* 5.7:1 — still AA at any size */
+
+  /* ── Atmosphere ──────────────────────────────────────────────────── */
+  /* The drifting background blobs. --blob-0 is the same colour at zero
+     alpha so the fade doesn't interpolate through grey. */
+  --blob: #122238;
+  --blob-0: rgb(18 34 56 / 0%);
+
+  /* ── Lines ───────────────────────────────────────────────────────── */
+  --line: rgb(183 137 55 / 22%);
+  --line-strong: rgb(183 137 55 / 46%);
+  --line-bone: rgb(237 231 219 / 14%);
+
+  /* ── Type ────────────────────────────────────────────────────────── */
+  --font-display: 'Jost Variable', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  --font-body: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif;
+
+  --fs-xs: clamp(0.75rem, 0.728rem + 0.094vw, 0.8125rem);
+  --fs-sm: clamp(0.875rem, 0.853rem + 0.094vw, 0.9375rem);
+  --fs-base: clamp(1rem, 0.956rem + 0.188vw, 1.125rem);
+  --fs-md: clamp(1.125rem, 1.059rem + 0.282vw, 1.3125rem);
+  --fs-lg: clamp(1.375rem, 1.243rem + 0.563vw, 1.75rem);
+  --fs-xl: clamp(1.75rem, 1.486rem + 1.127vw, 2.5rem);
+  --fs-2xl: clamp(2.25rem, 1.81rem + 1.878vw, 3.5rem);
+
+  /* Art deco lives on wide tracking in all-caps display text. */
+  --tr-tight: 0.02em;
+  --tr-wide: 0.16em;
+  --tr-wider: 0.3em;
+  --tr-widest: 0.46em;
+
+  --lh-tight: 1.1;
+  --lh-snug: 1.35;
+  --lh-body: 1.7;
+
+  /* ── Space (4px base) ────────────────────────────────────────────── */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-20: 5rem;
+
+  /* ── Shell ───────────────────────────────────────────────────────── */
+  --shell-x: clamp(1.25rem, 0.9rem + 1.5vw, 2.5rem);
+  --measure: 46ch;
+  --header-h: 4.5rem;
+  --footer-h: 4.5rem;
+  /* Footer band including the home-indicator inset it pads past — what the
+     last section has to give up so the footer lands inside the viewport. */
+  --footer-block: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
+
+  /* ── Depth ───────────────────────────────────────────────────────── */
+  --z-bg: 0;
+  --z-content: 10;
+  --z-rail: 40;
+  --z-chrome: 50;
+  --z-skip: 90;
+
+  --glow-gold: 0 0 0 1px rgb(183 137 55 / 40%), 0 0 24px -6px rgb(183 137 55 / 55%);
+
+  /* ── Motion ──────────────────────────────────────────────────────── */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-deco: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-inout: cubic-bezier(0.83, 0, 0.17, 1);
+
+  --dur-1: 160ms;
+  --dur-2: 280ms;
+  --dur-3: 480ms;
+  --dur-4: 760ms;
+  --dur-5: 1100ms;
+  --dur-6: 1600ms;
+
+  /* Multiplied into every animation so reduced-motion can zero it out. */
+  --motion: 1;
+}
+
+/* Two lines of legal text need more room than one. */
+@media (max-width: 30em) {
+  :root {
+    --footer-h: 5.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0;
+  }
+}

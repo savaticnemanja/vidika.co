@@ -1,0 +1,321 @@
+---
+export interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: 'text' | 'email';
+  as?: 'input' | 'textarea';
+  maxlength: number;
+  autocomplete?: string;
+  inputmode?: 'text' | 'email';
+  /** Renders the live character count (message field only). */
+  counter?: boolean;
+  delay?: number;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  as = 'input',
+  maxlength,
+  autocomplete,
+  inputmode,
+  counter = false,
+  delay = 0,
+} = Astro.props;
+
+const errorId = `${id}-error`;
+const countId = `${id}-count`;
+const describedBy = counter ? `${errorId} ${countId}` : errorId;
+---
+
+<div class="field" data-reveal="up" style={`--reveal-delay:${delay}ms`}>
+  <div class="field__box">
+    {
+      as === 'textarea' ? (
+        <textarea
+          id={id}
+          name={name}
+          class="field__control field__control--area"
+          placeholder=" "
+          required
+          maxlength={maxlength}
+          aria-describedby={describedBy}
+          rows="4"
+        />
+      ) : (
+        <input
+          id={id}
+          name={name}
+          type={type}
+          class="field__control"
+          placeholder=" "
+          required
+          maxlength={maxlength}
+          autocomplete={autocomplete}
+          inputmode={inputmode}
+          aria-describedby={describedBy}
+        />
+      )
+    }
+
+    <label for={id} class="field__label">{label}</label>
+
+    <span class="field__corner field__corner--tl" aria-hidden="true"></span>
+    <span class="field__corner field__corner--tr" aria-hidden="true"></span>
+    <span class="field__corner field__corner--bl" aria-hidden="true"></span>
+    <span class="field__corner field__corner--br" aria-hidden="true"></span>
+  </div>
+
+  <div class="field__meta">
+    <p id={errorId} class="field__error" data-error-for={id}></p>
+    {
+      counter && (
+        <span id={countId} class="field__count" data-counter-for={id}>
+          {`0 of ${maxlength} characters`}
+        </span>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .field {
+    position: relative;
+  }
+
+  .field__box {
+    position: relative;
+  }
+
+  .field__control {
+    display: block;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 1.35rem var(--sp-4) 0.55rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 300;
+    letter-spacing: var(--tr-tight);
+    color: var(--bone);
+    background-color: color-mix(in srgb, var(--ink-700) 62%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    outline: none;
+    transition:
+      border-color var(--dur-2) var(--ease-quart),
+      background-color var(--dur-2) var(--ease-quart),
+      box-shadow var(--dur-3) var(--ease-quart);
+  }
+
+  .field__control--area {
+    min-height: clamp(5.5rem, 17vh, 9rem);
+    padding-top: 1.6rem;
+    line-height: 1.6;
+    resize: none;
+  }
+
+  .field__control:hover {
+    border-color: var(--line-strong);
+  }
+
+  .field__control:focus {
+    border-color: var(--gold);
+    background-color: color-mix(in srgb, var(--ink-600) 58%, transparent);
+    box-shadow: var(--glow-gold);
+  }
+
+  /* Floating label — pure CSS, driven by :placeholder-shown. */
+  .field__label {
+    position: absolute;
+    top: 1rem;
+    left: calc(var(--sp-4) + 1px);
+    font-family: var(--font-display);
+    font-size: var(--fs-base);
+    font-weight: 300;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--bone-dim);
+    transform-origin: left top;
+    transition:
+      transform var(--dur-2) var(--ease-expo),
+      color var(--dur-2) var(--ease-quart);
+    pointer-events: none;
+  }
+
+  .field__control:focus + .field__label,
+  .field__control:not(:placeholder-shown) + .field__label {
+    transform: translateY(-0.62rem) scale(0.72);
+  }
+
+  .field__control:focus + .field__label {
+    color: var(--gold);
+  }
+
+  /* Deco corner ticks that snap in on focus. */
+  .field__corner {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 0 solid var(--gold);
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease-quart),
+      inset var(--dur-3) var(--ease-expo);
+    pointer-events: none;
+  }
+
+  .field__corner--tl {
+    inset: 5px auto auto 5px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .field__corner--tr {
+    inset: 5px 5px auto auto;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .field__corner--bl {
+    inset: auto auto 5px 5px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .field__corner--br {
+    inset: auto 5px 5px auto;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .field__control:focus ~ .field__corner {
+    opacity: 1;
+  }
+
+  .field__control:focus ~ .field__corner--tl {
+    inset: -3px auto auto -3px;
+  }
+
+  .field__control:focus ~ .field__corner--tr {
+    inset: -3px -3px auto auto;
+  }
+
+  .field__control:focus ~ .field__corner--bl {
+    inset: auto auto -3px -3px;
+  }
+
+  .field__control:focus ~ .field__corner--br {
+    inset: auto -3px -3px auto;
+  }
+
+  /* ── Invalid state ───────────────────────────────────────────────── */
+
+  .field__control[aria-invalid='true'] {
+    border-color: #c76a5a;
+  }
+
+  .field__control[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 1px rgb(199 106 90 / 45%), 0 0 24px -6px rgb(199 106 90 / 55%);
+  }
+
+  .field__meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 1.1rem;
+    padding-block-start: 0.3rem;
+    padding-inline: 2px;
+  }
+
+  .field__error {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    line-height: 1.2;
+    letter-spacing: var(--tr-tight);
+    color: #e2917f;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition:
+      opacity var(--dur-2) var(--ease-quart),
+      transform var(--dur-2) var(--ease-expo);
+  }
+
+  .field__error:not(:empty) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .field__count {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tr-tight);
+    color: var(--bone-dim);
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease-quart);
+  }
+
+  .field:focus-within .field__count {
+    opacity: 1;
+  }
+
+  /* Matches the short-viewport tightening in Contact.astro — the field's own
+     min-heights don't scale with vh like the surrounding margins do, so they
+     need an explicit floor to stop the form from outgrowing one screen. */
+  @media (max-height: 820px) {
+    .field__control {
+      min-height: 2.75rem;
+      padding-block: 1.1rem 0.4rem;
+    }
+
+    .field__control--area {
+      min-height: clamp(4rem, 11vh, 6.5rem);
+      padding-top: 1.35rem;
+    }
+
+    .field__label {
+      top: 0.85rem;
+    }
+
+    .field__control:focus + .field__label,
+    .field__control:not(:placeholder-shown) + .field__label {
+      transform: translateY(-0.56rem) scale(0.72);
+    }
+
+    .field__meta {
+      min-height: 0.9rem;
+      padding-block-start: 0.2rem;
+    }
+  }
+
+  @media (max-height: 700px) {
+    .field__control {
+      min-height: 2.4rem;
+      padding-block: 0.85rem 0.3rem;
+    }
+
+    .field__control--area {
+      min-height: clamp(2.85rem, 7.5vh, 5rem);
+      padding-top: 1.05rem;
+    }
+
+    .field__label {
+      top: 0.7rem;
+    }
+
+    .field__control:focus + .field__label,
+    .field__control:not(:placeholder-shown) + .field__label {
+      transform: translateY(-0.5rem) scale(0.7);
+    }
+
+    .field__meta {
+      min-height: 0.75rem;
+    }
+  }
+</style>

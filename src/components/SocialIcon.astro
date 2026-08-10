@@ -1,0 +1,73 @@
+---
+interface Props {
+  name: 'linkedin' | 'imdb' | 'instagram';
+}
+
+const { name } = Astro.props;
+---
+
+<svg
+  class="social-icon"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {
+    name === 'linkedin' && (
+      <>
+        <path d="M6.6 10v8.4" />
+        <path d="M6.6 6.1v.01" />
+        <path d="M11.1 18.4V10" />
+        <path d="M11.1 13.9c0-2.4 1.4-3.9 3.2-3.9s3.1 1.5 3.1 3.9v4.5" />
+      </>
+    )
+  }
+  {
+    /* Stroked letterforms are unreadable at 18px, so IMDb keeps its badge:
+       a solid plate with knocked-out lettering. */
+    name === 'imdb' && (
+      <>
+        <rect x="2" y="5.6" width="20" height="12.8" rx="2.6" fill="currentColor" stroke="none" />
+        <text
+          class="social-icon__imdb"
+          x="12"
+          y="14.5"
+          text-anchor="middle"
+          font-size="8.4"
+          font-weight="600"
+          stroke="none"
+        >
+          IMDb
+        </text>
+      </>
+    )
+  }
+  {
+    name === 'instagram' && (
+      <>
+        <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.2" />
+        <circle cx="12" cy="12" r="4" />
+        <path d="M17.1 6.9v.01" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .social-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .social-icon__imdb {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    /* Knocked out of the plate, so it tracks the page ground, not the ink. */
+    fill: var(--ink-900);
+  }
+</style>

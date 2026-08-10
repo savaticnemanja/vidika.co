@@ -1,0 +1,31 @@
+{
+  "name": "VIDIKA — Creative Origins",
+  "short_name": "VIDIKA",
+  "description": "VIDIKA is a creative studio where original IPs evolve into imaginative universes across media, technology, education, culture, and live experiences.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a131f",
+  "theme_color": "#0a131f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

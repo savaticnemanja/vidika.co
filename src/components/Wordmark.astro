@@ -1,0 +1,94 @@
+---
+/**
+ * The VIDIKA wordmark as brand-accurate outlines — each letter is its own path
+ * so they can rise in sequence, with a gold sheen sweeping across afterwards.
+ */
+const LETTERS = [
+  'M261.28,704.28l-39.4-108.55h14.26l32.04,88.01,31.89-88.01h6.9l-39.56,108.55h-6.13Z',
+  'M414.06,703.97h-13.49v-107.94h13.49v107.94Z',
+  'M606.45,650c0,33.88-23.31,53.97-52.13,53.97h-29.44v-107.94h29.44c28.82,0,52.13,20.09,52.13,53.97ZM552.79,697.84c21.47,0,38.94-14.87,38.94-47.84s-17.48-47.84-38.94-47.84h-14.41v95.68h14.41Z',
+  'M718.92,703.97h-13.49v-107.94h13.49v107.94Z',
+  'M847,650.31l-5.21,5.06v48.6h-13.49v-107.94h13.49v50.9l52.59-50.9h8.89l-46.3,44.92,49.06,63.02h-17.02l-42.01-53.66Z',
+  'M989.81,705.2l42.47-110.39h3.53l42.32,110.39h-14.41l-12.73-33.12h-41.55l-12.73,33.12h-6.9ZM1011.74,665.95h36.8l-18.4-48.14-18.4,48.14Z',
+];
+---
+
+<svg class="wordmark" viewBox="220 591 864 118" role="img" aria-label="VIDIKA">
+  <defs>
+    <clipPath id="wordmark-clip">
+      {LETTERS.map((d) => <path d={d} />)}
+    </clipPath>
+
+    <linearGradient id="wordmark-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff3d6" stop-opacity="0" />
+      <stop offset="50%" stop-color="#fff8e6" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#fff3d6" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  {
+    LETTERS.map((d, i) => (
+      <path class="wordmark__letter" d={d} style={`--order:${i}`} />
+    ))
+  }
+
+  <g clip-path="url(#wordmark-clip)" aria-hidden="true">
+    <rect class="wordmark__sheen" x="-60" y="560" width="240" height="200" fill="url(#wordmark-sheen)" />
+  </g>
+</svg>
+
+<style>
+  .wordmark {
+    width: 100%;
+    height: auto;
+  }
+
+  .wordmark__letter {
+    fill: var(--gold);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: letter-rise calc(var(--dur-5) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc((820ms + var(--order) * 80ms) * var(--motion));
+  }
+
+  .wordmark__sheen {
+    mix-blend-mode: screen;
+    animation: sheen-sweep calc(7000ms * var(--motion)) var(--ease-quart) infinite;
+    animation-delay: calc(2200ms * var(--motion));
+  }
+
+  @keyframes letter-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+  }
+
+  /* Long dwell, quick sweep — a highlight catching the metal, not a loop. */
+  @keyframes sheen-sweep {
+    0% {
+      transform: translateX(0) skewX(-18deg);
+      opacity: 0;
+    }
+
+    4% {
+      opacity: 1;
+    }
+
+    26% {
+      opacity: 1;
+    }
+
+    32%,
+    100% {
+      transform: translateX(1160px) skewX(-18deg);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wordmark__sheen {
+      display: none;
+    }
+  }
+</style>

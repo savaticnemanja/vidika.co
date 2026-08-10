@@ -1,0 +1,173 @@
+---
+import Symbol from './Symbol.astro';
+import Wordmark from './Wordmark.astro';
+import { SITE } from '../site.config';
+---
+
+<section id="origin" class="panel hero" data-panel="origin" aria-labelledby="hero-title">
+  <div class="hero__inner">
+    <div class="hero__symbol">
+      <Symbol />
+    </div>
+
+    <h1 id="hero-title" class="hero__title">
+      <span class="visually-hidden">{SITE.name}</span>
+      <span class="hero__wordmark" aria-hidden="true">
+        <Wordmark />
+      </span>
+    </h1>
+
+    <p class="hero__tagline">
+      <span class="hero__rule" aria-hidden="true"></span>
+      {SITE.tagline}
+      <span class="hero__rule" aria-hidden="true"></span>
+    </p>
+  </div>
+
+  <a class="cue" href="#about">
+    <span class="visually-hidden">Scroll to the next section</span>
+    <span class="cue__mouse" aria-hidden="true">
+      <span class="cue__bead"></span>
+    </span>
+  </a>
+</section>
+
+<style>
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1.75rem, 4.5vh, 3.25rem);
+  }
+
+  .hero__symbol {
+    width: clamp(9.75rem, 27.5vmin, 16rem);
+  }
+
+  .hero__title {
+    margin: 0;
+  }
+
+  .hero__wordmark {
+    display: block;
+    width: clamp(15rem, 53vmin, 31rem);
+  }
+
+  .hero__tagline {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 3vw, 1.75rem);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: var(--tr-wider);
+    text-transform: uppercase;
+    color: var(--bone-soft);
+    white-space: nowrap;
+    animation: tagline-in calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc(1350ms * var(--motion));
+  }
+
+  /* Deco flanking rules that draw outward from the tagline. */
+  .hero__rule {
+    width: clamp(1.5rem, 7vw, 4rem);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--line-strong), transparent);
+    transform-origin: center;
+    animation: rule-out calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc(1550ms * var(--motion));
+  }
+
+  /* ── Scroll cue ──────────────────────────────────────────────────── */
+
+  .cue {
+    position: absolute;
+    bottom: calc(var(--footer-h) + var(--sp-4));
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -1.375rem;
+    color: var(--bone-dim);
+    animation: fade-up calc(var(--dur-5) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc(1900ms * var(--motion));
+    transition: color var(--dur-2) var(--ease-quart);
+  }
+
+  .cue:hover,
+  .cue:focus-visible {
+    color: var(--gold-lift);
+  }
+
+  .cue__mouse {
+    position: relative;
+    width: 1.35rem;
+    height: 2.15rem;
+    border: 1px solid currentColor;
+    border-radius: 0.7rem;
+    opacity: 0.75;
+  }
+
+  .cue__bead {
+    position: absolute;
+    top: 0.4rem;
+    left: 50%;
+    width: 3px;
+    height: 6px;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    animation: bead calc(2200ms * var(--motion)) var(--ease-inout) infinite;
+  }
+
+  @keyframes tagline-in {
+    from {
+      opacity: 0;
+      letter-spacing: var(--tr-widest);
+    }
+  }
+
+  @keyframes rule-out {
+    from {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 0.75rem, 0);
+    }
+  }
+
+  @keyframes bead {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    75% {
+      opacity: 0;
+      transform: translateY(0.7rem);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(0.7rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cue__bead {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>

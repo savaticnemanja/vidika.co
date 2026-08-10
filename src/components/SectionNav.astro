@@ -1,0 +1,151 @@
+---
+import { SECTIONS } from '../site.config';
+---
+
+<nav class="rail" aria-label="Section">
+  <span class="rail__track" aria-hidden="true">
+    <span class="rail__progress"></span>
+  </span>
+
+  <ul class="rail__list" role="list">
+    {
+      SECTIONS.map((section, i) => (
+        <li>
+          <a class="dot" href={`#${section.id}`} style={`--i:${i}`} data-rail-link={section.id}>
+            <span class="dot__label" aria-hidden="true">
+              <span class="dot__index">{section.index}</span>
+              {section.label}
+            </span>
+            <span class="dot__diamond" aria-hidden="true" />
+            <span class="visually-hidden">{`${section.label} — section ${section.index} of 0${SECTIONS.length}`}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .rail {
+    position: fixed;
+    top: 50%;
+    right: calc(var(--shell-x) * 0.5);
+    z-index: var(--z-rail);
+    transform: translateY(-50%);
+    animation: rail-in calc(var(--dur-5) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc(1200ms * var(--motion));
+  }
+
+  .rail__track {
+    position: absolute;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    right: calc(50% - 0.5px);
+    width: 1px;
+    background: var(--line-bone);
+  }
+
+  /* --progress is written by motion.ts as the scroller moves. */
+  .rail__progress {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--gold), var(--gold-lift));
+    transform-origin: top;
+    transform: scaleY(var(--progress, 0));
+    transition: transform var(--dur-2) var(--ease-quart);
+  }
+
+  .rail__list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .dot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .dot__diamond {
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid var(--line-strong);
+    transform: rotate(45deg) scale(1);
+    transition:
+      background-color var(--dur-3) var(--ease-expo),
+      border-color var(--dur-3) var(--ease-expo),
+      transform var(--dur-3) var(--ease-expo),
+      box-shadow var(--dur-3) var(--ease-expo);
+  }
+
+  .dot:hover .dot__diamond,
+  .dot:focus-visible .dot__diamond {
+    border-color: var(--gold-lift);
+    transform: rotate(45deg) scale(1.35);
+  }
+
+  .dot[aria-current='true'] .dot__diamond {
+    background-color: var(--gold);
+    border-color: var(--gold);
+    transform: rotate(45deg) scale(1.25);
+    box-shadow: 0 0 0 4px rgb(183 137 55 / 14%), 0 0 18px -2px rgb(183 137 55 / 80%);
+  }
+
+  /* Label slides out of the rail on hover/focus. */
+  .dot__label {
+    position: absolute;
+    right: calc(100% + 0.25rem);
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 300;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--bone);
+    background: color-mix(in srgb, var(--ink-800) 92%, transparent);
+    border: 1px solid var(--line);
+    opacity: 0;
+    transform: translateX(0.5rem);
+    transition:
+      opacity var(--dur-2) var(--ease-quart),
+      transform var(--dur-3) var(--ease-expo);
+    pointer-events: none;
+  }
+
+  .dot__index {
+    color: var(--gold);
+  }
+
+  .dot:hover .dot__label,
+  .dot:focus-visible .dot__label {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @keyframes rail-in {
+    from {
+      opacity: 0;
+      transform: translate(0.75rem, -50%);
+    }
+  }
+
+  /* On narrow screens the rail would sit on top of the content column, and a
+     thumb has nothing useful to aim at — snapping already does the work. */
+  @media (max-width: 47.99em), (max-height: 560px) {
+    .rail {
+      display: none;
+    }
+  }
+</style>

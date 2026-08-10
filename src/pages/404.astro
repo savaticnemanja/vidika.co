@@ -1,0 +1,108 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Symbol from '../components/Symbol.astro';
+import { SITE } from '../site.config';
+---
+
+<Base
+  title={`Page not found — ${SITE.name}`}
+  description="This page doesn’t exist."
+  noindex
+  bodyClass="is-static"
+>
+  <main id="main" class="notfound">
+    <div class="notfound__symbol" aria-hidden="true">
+      <Symbol />
+    </div>
+
+    <p class="notfound__code">404</p>
+    <h1 class="notfound__title">This path leads nowhere</h1>
+    <p class="notfound__body">
+      The page you were looking for isn’t here. Everything else is one step back.
+    </p>
+
+    <a class="notfound__home" href="/">
+      Return to {SITE.name}
+    </a>
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<style>
+  .notfound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-4);
+    min-height: calc(100dvh - var(--footer-block));
+    padding: var(--sp-8) var(--shell-x);
+    text-align: center;
+  }
+
+  .notfound__symbol {
+    width: clamp(6rem, 16vmin, 9rem);
+    margin-block-end: var(--sp-4);
+    opacity: 0.85;
+  }
+
+  .notfound__code {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    letter-spacing: var(--tr-widest);
+    color: var(--gold);
+  }
+
+  .notfound__title {
+    font-size: var(--fs-xl);
+    font-weight: 200;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--bone);
+  }
+
+  .notfound__body {
+    max-width: 34ch;
+    font-size: var(--fs-md);
+    color: var(--bone-soft);
+  }
+
+  .notfound__home {
+    position: relative;
+    margin-block-start: var(--sp-6);
+    padding: 1rem clamp(1.75rem, 6vw, 2.75rem);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    letter-spacing: var(--tr-wider);
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--line-strong);
+    isolation: isolate;
+    transition: color var(--dur-3) var(--ease-quart);
+  }
+
+  .notfound__home::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, var(--gold), var(--gold-lift));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-3) var(--ease-deco);
+  }
+
+  .notfound__home:hover,
+  .notfound__home:focus-visible {
+    color: var(--ink-1000);
+  }
+
+  .notfound__home:hover::before,
+  .notfound__home:focus-visible::before {
+    transform: scaleX(1);
+  }
+</style>

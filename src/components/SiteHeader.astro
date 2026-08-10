@@ -1,0 +1,182 @@
+---
+import { SOCIALS, SITE } from '../site.config';
+import SocialIcon from './SocialIcon.astro';
+---
+
+<header class="header">
+  <a class="header__mark" href="#origin" aria-label={`${SITE.name} — back to top`}>
+    <span class="header__mark-glyph" aria-hidden="true"></span>
+  </a>
+
+  <nav class="header__social" aria-label="VIDIKA on social platforms">
+    <ul class="header__list" role="list">
+      {
+        SOCIALS.map((social, i) => (
+          <li>
+            <a
+              class="social"
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={`--i:${i}`}
+            >
+              <SocialIcon name={social.icon} />
+              <span class="visually-hidden">{social.label} (opens in a new tab)</span>
+              <span class="social__tick social__tick--tl" aria-hidden="true"></span>
+              <span class="social__tick social__tick--br" aria-hidden="true"></span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-chrome);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    height: var(--header-h);
+    padding-inline: var(--shell-x);
+    pointer-events: none;
+  }
+
+  .header > * {
+    pointer-events: auto;
+  }
+
+  /* Small diamond that only appears once you've left the hero. */
+  .header__mark {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-inline-start: -0.6rem;
+    opacity: 0;
+    transform: scale(0.6) rotate(45deg);
+    transition:
+      opacity var(--dur-3) var(--ease-expo),
+      transform var(--dur-3) var(--ease-expo);
+    pointer-events: none;
+  }
+
+  :global(body[data-section='origin']) .header__mark {
+    pointer-events: none;
+  }
+
+  /* Requires the attribute to be present: before the section tracker has run
+     there is no known section, and the mark belongs hidden — matching the
+     hero — rather than showing because the selector happened to match. */
+  :global(body[data-section]:not([data-section='origin'])) .header__mark {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+    pointer-events: auto;
+  }
+
+  .header__mark-glyph {
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 1px solid var(--gold);
+    transition:
+      background-color var(--dur-2) var(--ease-quart),
+      box-shadow var(--dur-2) var(--ease-quart);
+  }
+
+  .header__mark:hover .header__mark-glyph {
+    background-color: var(--gold);
+    box-shadow: 0 0 16px -2px rgb(183 137 55 / 70%);
+  }
+
+  .header__list {
+    display: flex;
+    gap: var(--sp-2);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .social {
+    position: relative;
+    display: grid;
+    place-items: center;
+    /* 44px minimum touch target. */
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--gold);
+    border: 1px solid var(--line);
+    transition:
+      color var(--dur-2) var(--ease-quart),
+      border-color var(--dur-2) var(--ease-quart),
+      background-color var(--dur-2) var(--ease-quart);
+    animation: drop-in calc(var(--dur-4) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc((1000ms + var(--i) * 90ms) * var(--motion));
+  }
+
+  .social :global(.social-icon) {
+    transition: transform var(--dur-3) var(--ease-expo);
+  }
+
+  .social:hover,
+  .social:focus-visible {
+    color: var(--gold-lift);
+    border-color: var(--line-strong);
+    background-color: var(--gold-wash);
+  }
+
+  .social:hover :global(.social-icon) {
+    transform: scale(1.12);
+  }
+
+  .social:active {
+    transform: scale(0.94);
+  }
+
+  /* Deco corner ticks that extend on hover. */
+  .social__tick {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 0 solid var(--gold-lift);
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease-quart),
+      inset var(--dur-3) var(--ease-expo);
+  }
+
+  .social__tick--tl {
+    inset: 4px auto auto 4px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+
+  .social__tick--br {
+    inset: auto 4px 4px auto;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .social:hover .social__tick,
+  .social:focus-visible .social__tick {
+    opacity: 1;
+  }
+
+  .social:hover .social__tick--tl {
+    inset: -1px auto auto -1px;
+  }
+
+  .social:hover .social__tick--br {
+    inset: auto -1px -1px auto;
+  }
+
+  @keyframes drop-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -0.75rem, 0);
+    }
+  }
+</style>
