@@ -27,6 +27,11 @@ import { SECTIONS } from '../site.config';
 
 <style>
   .rail {
+    /* One source for the dot's box, because the track is measured from it. */
+    --dot-size: 2.75rem;
+    /* And one for the track's, because its centring is measured from that. */
+    --track-w: 2px;
+
     position: fixed;
     top: 50%;
     right: calc(var(--shell-x) * 0.5);
@@ -36,24 +41,46 @@ import { SECTIONS } from '../site.config';
     animation-delay: calc(1200ms * var(--motion));
   }
 
+  /* Runs centre-to-centre of the first and last diamond — half a dot in from
+     each end — rather than to the edges of the list. The progress fill below
+     is driven by raw scroll ratio, so the track's ends are what that ratio is
+     measured against: any other length and 0 stops short of the first diamond
+     while 1 overshoots the last, and the tip never lands on the mark it is
+     meant to be pointing at. */
   .rail__track {
     position: absolute;
-    top: 0.75rem;
-    bottom: 0.75rem;
-    right: calc(50% - 0.5px);
-    width: 1px;
+    top: calc(var(--dot-size) / 2);
+    bottom: calc(var(--dot-size) / 2);
+    /* Half its own width in from the centre line — derived rather than typed,
+       so changing the weight can't quietly knock it off centre. */
+    right: calc(50% - var(--track-w) / 2);
+    width: var(--track-w);
     background: var(--line-bone);
   }
 
-  /* --progress is written by motion.ts as the scroller moves. */
+  /* --progress is written by motion.ts as the scroller moves.
+   *
+   * Flat brand gold, not a ramp toward --gold-lift: that ramp put the line at
+   * its brightest exactly where its leading edge is, so the fill read as
+   * heavier the further you scrolled. The lift belongs to hover states, not to
+   * a position readout — the diamond already says which section is current.
+   *
+   * Grown by height rather than by scaleY, and with no transition of its own.
+   * A transitioning transform promotes the fill to its own composited layer,
+   * and there it is rasterised without the pixel snapping the normal painter
+   * applies — so a 2px line whose x lands between pixels spreads across three
+   * soft ones. That is why it thickened while the scroll was moving and
+   * sharpened the moment it stopped. Height is a layout property: painted the
+   * same way whether it is changing or not. It costs a layout on a 2px
+   * out-of-flow element, which is nothing, and it gives up no smoothness —
+   * motion.ts already writes --progress once per animation frame, so the
+   * scroll itself is the easing.
+   */
   .rail__progress {
     position: absolute;
     inset: 0 0 auto;
-    height: 100%;
-    background: linear-gradient(to bottom, var(--gold), var(--gold-lift));
-    transform-origin: top;
-    transform: scaleY(var(--progress, 0));
-    transition: transform var(--dur-2) var(--ease-quart);
+    height: calc(var(--progress, 0) * 100%);
+    background: var(--gold);
   }
 
   .rail__list {
@@ -70,8 +97,8 @@ import { SECTIONS } from '../site.config';
     position: relative;
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: var(--dot-size);
+    height: var(--dot-size);
   }
 
   .dot__diamond {
@@ -138,6 +165,21 @@ import { SECTIONS } from '../site.config';
     from {
       opacity: 0;
       transform: translate(0.75rem, -50%);
+    }
+  }
+
+  /* Two indicators saying the same thing is one too many: wherever the rail is
+     shown, the scroller gives up its own scrollbar. This query is the
+     complement of the one below, and lives beside it so the pair can't drift
+     apart when either moves. Nothing is lost with it gone — the rail reports
+     the same position, and unlike a scrollbar it can be tabbed to and used. */
+  @media (min-width: 48em) and (min-height: 561px) {
+    :global(.scroller) {
+      scrollbar-width: none;
+    }
+
+    :global(.scroller)::-webkit-scrollbar {
+      display: none;
     }
   }
 

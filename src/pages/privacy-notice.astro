@@ -1,0 +1,398 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Logo from '../components/Logo.astro';
+import { SITE, LEGAL, SOCIALS } from '../site.config';
+
+const updated = new Date(LEGAL.privacyUpdated).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/* Registry details render only once they exist — see LEGAL in site.config.ts. */
+const identity = [
+  { label: 'Registered address', value: LEGAL.address },
+  { label: 'Registration number', value: LEGAL.registrationNumber },
+  { label: 'Tax number (PIB)', value: LEGAL.taxId },
+].filter((row) => row.value);
+
+/** "LinkedIn, IMDb and Instagram" — reads as a sentence, not a list. */
+const labels = SOCIALS.map((social) => social.label);
+const platforms = labels.slice(0, -1).join(', ') + ' and ' + labels.at(-1);
+---
+
+<Base
+  title={`Privacy Notice — ${SITE.name}`}
+  description={`How ${SITE.name} handles personal data: no cookies, no analytics, and nothing beyond what you send us through the contact form.`}
+  bodyClass="is-static"
+>
+  <main id="main" class="legal">
+    <article class="legal__shell">
+      <a class="legal__mark" href="/" aria-label={`${SITE.name} — home`}>
+        <Logo animate={false} label="" />
+      </a>
+
+      {/* No eyebrow above the title: the logo says the name, and saying it
+          again two lines later is the page introducing itself twice. */}
+      <header class="legal__head">
+        <h1 class="legal__title">Privacy Notice</h1>
+        <p class="legal__meta">
+          Last updated <time datetime={LEGAL.privacyUpdated}>{updated}</time>
+        </p>
+      </header>
+
+      <div class="prose">
+        <p class="prose__lead">
+          This site sets no cookies of its own, runs no analytics, and loads nothing from a
+          third-party server. The only personal data we handle is what you choose to send us
+          through the contact form.
+        </p>
+
+        <h2>Who we are</h2>
+        <p>
+          {SITE.name} is the trading name of {SITE.legalName}, registered in Serbia. We decide why
+          and how the personal data described here is handled, which makes us its controller.
+        </p>
+        <dl class="identity">
+          {
+            identity.map((row) => (
+              <>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </>
+            ))
+          }
+          <dt>Email</dt>
+          <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+        </dl>
+
+        <h2>Visiting the site</h2>
+        <p>
+          We set no cookies, and we store nothing in your browser. There is no analytics, no
+          tracking pixel, and no advertising code anywhere on this site. Our typefaces are served
+          from our own domain rather than a font network, so simply reading this page doesn’t
+          announce your visit to anyone else.
+        </p>
+        <p>
+          Two things still happen, as they do for any website. Our hosting and security providers
+          record a standard log line for each request — IP address, time, the page asked for, and
+          the browser’s user agent — which keeps the site available and lets us see an attack for
+          what it is. And Cloudflare, which delivers the site and shields it from abuse, sets a
+          single <code>__cf_bm</code> cookie to tell human visitors from bots. It carries no profile
+          of you, expires within half an hour, and is strictly necessary for the site’s security —
+          which is why there is no cookie banner to click past.
+        </p>
+
+        <h2>When you write to us</h2>
+        <p>The contact form asks for three things: your name, your email address, and your message.</p>
+        <p>
+          The email that reaches us also carries a few technical details recorded at the moment you
+          send: your IP address and the approximate country it resolves to, your browser’s user
+          agent, the date and time, and how long the form was open before submission. The last of
+          those is a spam signal — forms filled in under three seconds weren’t filled in by a
+          person.
+        </p>
+        <p>
+          We use all of this to read your message and reply to it, and to keep the form from being
+          turned into a spam relay. Under the GDPR our grounds are Article 6(1)(b), where your
+          message is a step toward working together, and Article 6(1)(f), our legitimate interest
+          in answering enquiries and protecting our own infrastructure; the Serbian Personal Data
+          Protection Act provides the equivalent grounds. There is no automated decision-making and
+          no profiling. We don’t add you to a mailing list, and we never sell or share your details
+          for advertising.
+        </p>
+        <p>
+          To cap how often the form can be submitted, IP addresses are held in the handler’s memory
+          for a rolling ten minutes and then discarded. They are never written to a database.
+        </p>
+
+        <h2>How long we keep it</h2>
+        <p>
+          Your message and our reply stay in the {SITE.email} mailbox for as long as the conversation
+          — and anything that grows out of it — needs them. Correspondence with no continuing
+          purpose is deleted within {LEGAL.enquiryRetention} of our last exchange. The anti-spam IP
+          data is gone within ten minutes, and our providers rotate their request logs on their own
+          schedules, typically within days.
+        </p>
+
+        <h2>Who else handles it</h2>
+        <p>
+          Only the providers that make the site and its inbox work, each acting on our instructions
+          under a data processing agreement:
+        </p>
+        <ul>
+          <li>the infrastructure provider that hosts the site and the contact handler;</li>
+          <li>Cloudflare, for content delivery, DNS and protection against attack;</li>
+          <li>
+            the email provider that delivers your enquiry and hosts the mailbox our reply is written
+            from.
+          </li>
+        </ul>
+        <p>Nobody else receives it.</p>
+
+        <h2>Where it goes</h2>
+        <p>
+          We are based in Serbia, which sits outside the European Economic Area. If you write to us
+          from the EEA, your message travels to us here, and some of the providers above may process
+          it outside the EEA as well. Where the law requires a safeguard for that journey, it rests
+          on the European Commission’s standard contractual clauses.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>
+          You can ask us for a copy of the personal data we hold about you, ask us to correct it or
+          delete it, ask us to restrict what we do with it, object to our handling it on legitimate
+          interest grounds, or ask for it in a portable form. Write to
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and we will answer within 30 days.
+        </p>
+        <p>
+          If you think we have got it wrong, you can complain to the Serbian supervisory authority —
+          the Commissioner for Information of Public Importance and Personal Data Protection,
+          Bulevar kralja Aleksandra 15, 11120 Belgrade,
+          <a href="mailto:office@poverenik.rs">office@poverenik.rs</a> — or, if you are in the EEA,
+          to the authority where you live.
+        </p>
+
+        <h2>Children</h2>
+        <p>
+          This site isn’t aimed at children, and we don’t knowingly collect data from anyone under
+          16. If you believe a child has sent us their details, write to us and we will delete them.
+        </p>
+
+        <h2>Leaving the site</h2>
+        <p>
+          The links in the corner of the site lead to our pages on {platforms}. Follow one and you
+          are on their ground, under their privacy policies rather than this one.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          If this notice changes in a way that matters, we will update the date at the top of the
+          page. This version was published on <time datetime={LEGAL.privacyUpdated}>{updated}</time>.
+        </p>
+      </div>
+
+      <a class="legal__back" href="/">Return to {SITE.name}</a>
+    </article>
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<style>
+  .legal {
+    padding: clamp(3rem, 9vh, 5.5rem) var(--shell-x) clamp(2rem, 6vh, 3.5rem);
+  }
+
+  .legal__shell {
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+
+  /* The full lockup as the page's masthead, at the width the line under the
+     name still holds its shape — it is set in a light face, and much smaller
+     than this it turns to haze. */
+  .legal__mark {
+    display: block;
+    width: clamp(15rem, 46vw, 19rem);
+    margin-inline: auto;
+    color: var(--gold);
+    opacity: 0.9;
+    transition:
+      color var(--dur-2) var(--ease-quart),
+      opacity var(--dur-2) var(--ease-quart);
+  }
+
+  .legal__mark:hover,
+  .legal__mark:focus-visible {
+    color: var(--gold-lift);
+    opacity: 1;
+  }
+
+  .legal__mark :global(.logo) {
+    color: inherit;
+  }
+
+  .legal__head {
+    margin-block: clamp(2rem, 6vh, 3rem) clamp(2.5rem, 7vh, 3.75rem);
+    text-align: center;
+  }
+
+  .legal__title {
+    font-size: var(--fs-xl);
+    font-weight: 200;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--bone);
+  }
+
+  .legal__meta {
+    margin-block-start: var(--heading-gap);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 300;
+    letter-spacing: var(--tr-wide);
+    text-transform: uppercase;
+    color: var(--bone-dim);
+  }
+
+  /* ── Prose ───────────────────────────────────────────────────────── */
+
+  .prose {
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    color: var(--bone-soft);
+  }
+
+  .prose__lead {
+    padding-block-end: clamp(1.25rem, 4vh, 2rem);
+    border-block-end: 1px solid var(--line);
+    font-size: var(--fs-md);
+    color: var(--bone);
+  }
+
+  .prose h2 {
+    margin-block: clamp(2.25rem, 6vh, 3rem) var(--sp-4);
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    letter-spacing: var(--tr-wider);
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .prose p + p,
+  .prose ul {
+    margin-block-start: var(--sp-4);
+  }
+
+  .prose ul {
+    padding-inline-start: var(--sp-5);
+    list-style: none;
+  }
+
+  .prose li {
+    position: relative;
+  }
+
+  .prose li + li {
+    margin-block-start: var(--sp-2);
+  }
+
+  /* A deco tick rather than a bullet — the mark's own geometry, small. */
+  .prose li::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.72em;
+    inset-inline-start: calc(var(--sp-5) * -1);
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    opacity: 0.7;
+  }
+
+  .prose code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    letter-spacing: 0;
+    color: var(--bone);
+  }
+
+  .prose a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 0.2em;
+    transition:
+      color var(--dur-2) var(--ease-quart),
+      text-decoration-color var(--dur-2) var(--ease-quart);
+  }
+
+  .prose a:hover,
+  .prose a:focus-visible {
+    color: var(--gold-lift);
+    text-decoration-color: currentColor;
+  }
+
+  /* ── Identity table ──────────────────────────────────────────────── */
+
+  .identity {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-2) var(--sp-6);
+    margin-block-start: var(--sp-5);
+    padding-inline-start: var(--sp-5);
+    border-inline-start: 1px solid var(--line);
+  }
+
+  .identity dt {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 300;
+    letter-spacing: var(--tr-wide);
+    line-height: var(--lh-snug);
+    text-transform: uppercase;
+    color: var(--bone-dim);
+    /* Optical alignment with the serif value beside it. */
+    padding-block-start: 0.35em;
+  }
+
+  .identity dd {
+    margin: 0;
+    line-height: var(--lh-snug);
+    color: var(--bone);
+  }
+
+  /* ── Back ────────────────────────────────────────────────────────── */
+
+  .legal__back {
+    position: relative;
+    display: block;
+    width: fit-content;
+    margin: clamp(3rem, 9vh, 4.5rem) auto 0;
+    padding: 1rem clamp(1.75rem, 6vw, 2.75rem);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    letter-spacing: var(--tr-wider);
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--line-strong);
+    isolation: isolate;
+    transition: color var(--dur-3) var(--ease-quart);
+  }
+
+  .legal__back::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, var(--gold), var(--gold-lift));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-3) var(--ease-deco);
+  }
+
+  .legal__back:hover,
+  .legal__back:focus-visible {
+    color: var(--ink-1000);
+  }
+
+  .legal__back:hover::before,
+  .legal__back:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  /* The label column costs more than it earns once the line gets short. */
+  @media (max-width: 30em) {
+    .identity {
+      grid-template-columns: 1fr;
+      gap: 0 var(--sp-6);
+    }
+
+    .identity dt {
+      padding-block-start: var(--sp-3);
+    }
+  }
+</style>

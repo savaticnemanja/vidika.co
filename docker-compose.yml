@@ -1,0 +1,71 @@
+# vidika.co — one container, behind nginx on the host.
+#
+# Values come from a `.env` file sitting next to this one on the server. That
+# file is never committed and never enters the image; see .env.example for the
+# keys it needs.
+#
+# There are no volumes because there is no state: no database, no uploads,
+# nothing written at runtime. Destroying and recreating this container loses
+# nothing, which is what makes `up -d --force-recreate` a safe deploy.
+
+services:
+  app:
+    # Built on the box. Switch both lines to a registry path
+    # (`image: ghcr.io/savaticnemanja/vidika-co:latest`, no `build:`) if you
+    # would rather build in CI and `docker compose pull` here — see
+    # .github/workflows/publish.yaml.
+    build: .
+    image: vidika-co:latest
+    container_name: vidika-co
+
+    # The 127.0.0.1 prefix is the single most important line in this file.
+    # Without it Docker publishes on 0.0.0.0 and — because it writes its own
+    # iptables rules, below the firewall — the port is reachable from the
+    # internet even when UFW says it is closed. Bound to loopback, only nginx
+    # can reach the app.
+    ports:
+      - "127.0.0.1:8080:8787"
+
+    environment:
+      NODE_ENV: production
+
+      # `:?` rather than a default: with no key the handler falls back to
+      # printing messages instead of sending them, which is a production box
+      # silently swallowing enquiries. Better to refuse to start.
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY in .env next to docker-compose.yml}
+
+      # Defaults match src/site.config.ts, so a deploy that sets nothing still
+      # behaves correctly.
+      MAIL_FROM: "${MAIL_FROM:-VIDIKA <contact@vidika.co>}"
+      MAIL_TO: "${MAIL_TO:-contact@vidika.co}"
+      MAIL_SUBJECT_PREFIX: "${MAIL_SUBJECT_PREFIX:-VIDIKA enquiry}"
+      MAIL_ACK: "${MAIL_ACK:-false}"
+
+      # The origin allowlist. Anything not listed gets a 403 on the form.
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-https://vidika.co,https://www.vidika.co}"
+
+      # Abuse controls. nginx throttles ahead of these; this is the backstop
+      # that survives the proxy config being changed.
+      RATE_MAX: "${RATE_MAX:-5}"
+      RATE_WINDOW_MS: "${RATE_WINDOW_MS:-600000}"
+      RATE_MAX_GLOBAL: "${RATE_MAX_GLOBAL:-60}"
+      MIN_ELAPSED_MS: "${MIN_ELAPSED_MS:-3000}"
+
+    restart: unless-stopped
+
+    # Survives a reboot but respects a deliberate `docker compose stop`;
+    # `always` fights you during maintenance.
+
+    # A static file server and one JSON route need very little. The point of
+    # the ceiling is that a runaway here cannot take down anything else on the
+    # box — on a single-site machine, that includes sshd.
+    mem_limit: 256m
+    cpus: "1.0"
+
+    # An unbounded json-file log will eventually fill a small VPS disk, and the
+    # symptom is every container on the box failing at once.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

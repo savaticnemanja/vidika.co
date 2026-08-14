@@ -1,0 +1,33 @@
+# Correctness — these would either overwrite what the build produces or bake
+# host state into the image.
+node_modules
+server/node_modules
+dist
+.astro
+server/.astro
+
+# Secrets. Every one of these holds, or has held, the Resend key. Environment
+# reaches the container from compose at runtime, never through a layer.
+.env
+.env.*
+.dev.vars
+server/.env
+
+# Speed — none of this is read by the build, and .git on a mature repo is
+# usually the largest single thing in the context.
+.git
+.github
+.vscode
+.claude
+.idea
+# scripts/ carries the asset generator and its source vectors — neither is
+# read by the build, only by `npm run gen:assets` by hand.
+scripts
+*.log
+.DS_Store
+
+# Docs. They change often, and a change to one should not invalidate a layer.
+README.md
+DOCKER.md
+DEPLOY.md
+server/README.md

@@ -1,5 +1,6 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "//": "server/ is plain Node ESM, not part of the Astro program — its globals clash with lib.dom and it is type-checked by nothing.",
+  "exclude": ["dist", "server"]
 }

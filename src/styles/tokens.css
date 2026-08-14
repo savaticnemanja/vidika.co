@@ -77,6 +77,13 @@
   --sp-16: 4rem;
   --sp-20: 5rem;
 
+  /* ── Section heading ─────────────────────────────────────────────── */
+  /* The air under a section heading, where the gold flare used to sit. A fixed
+     length rather than a vh clamp on purpose: viewport-relative spacing put the
+     break at a different distance from its heading on every screen, and on the
+     same screen the sections disagreed with each other. One length, everywhere. */
+  --heading-gap: 2rem;
+
   /* ── Shell ───────────────────────────────────────────────────────── */
   --shell-x: clamp(1.25rem, 0.9rem + 1.5vw, 2.5rem);
   --measure: 46ch;
@@ -112,12 +119,11 @@
   --motion: 1;
 }
 
-/* Two lines of legal text need more room than one. */
-@media (max-width: 30em) {
-  :root {
-    --footer-h: 5.25rem;
-  }
-}
+/* No mobile step for --footer-h: it used to be 5.25rem because two lines of
+   legal text needed more room than one, but the footer's leading has since been
+   pulled in far enough that they fit the standard band. It is a floor, not a
+   height, so a third line would still push the footer taller rather than
+   clipping. */
 
 @media (prefers-reduced-motion: reduce) {
   :root {

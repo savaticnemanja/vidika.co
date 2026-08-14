@@ -49,6 +49,20 @@ function initCounter(control: Control) {
   update();
 }
 
+/** Pulls the handler's own wording out of a failed response, if it sent any. */
+async function readError(response: Response): Promise<string | null> {
+  try {
+    const body: unknown = await response.json();
+    const error =
+      typeof body === 'object' && body !== null && 'error' in body
+        ? String((body as { error: unknown }).error).trim()
+        : '';
+    return error || null;
+  } catch {
+    return null;
+  }
+}
+
 export function initForm() {
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
   if (!form) return;
@@ -64,6 +78,7 @@ export function initForm() {
 
   const openedAt = Date.now();
   const idleLabel = label.textContent ?? 'Send message';
+  const genericError = `Something went wrong. Please email us directly at ${mailto}.`;
 
   /** Fields the visitor has actually engaged with, or that a submit flagged. */
   const touched = new WeakSet<Control>();
@@ -163,7 +178,13 @@ export function initForm() {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      if (!response.ok) {
+        // The handler explains itself in JSON — a rate limit or a rejected
+        // field deserves its own wording rather than the generic failure.
+        const reason = await readError(response);
+        setState('error', reason ?? genericError, 'error');
+        return;
+      }
 
       setState('sent', 'Thank you — your message is on its way.', 'success');
       form.reset();
@@ -173,11 +194,8 @@ export function initForm() {
 
       window.setTimeout(() => setState('idle', '', ''), 6000);
     } catch {
-      setState(
-        'error',
-        `Something went wrong. Please email us directly at ${mailto}.`,
-        'error',
-      );
+      // Network-level failure: offline, DNS, the handler being down.
+      setState('error', genericError, 'error');
     }
   });
 }

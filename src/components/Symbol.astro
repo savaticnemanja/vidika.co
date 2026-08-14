@@ -1,32 +1,35 @@
 ---
 /**
- * The VIDIKA mark, rebuilt from the brand vector as eight independent chevrons
- * so they can fly in from their own side of the diamond and lock into place.
- *
- * `dx`/`dy` are the outward offsets each piece starts from (SVG user units);
- * `order` is its position in the assembly stagger.
+ * The VIDIKA diamond on its own — the wordless mark used at tab size in the
+ * header and on the standalone pages. The homepage shows the full lockup
+ * instead; see Logo.astro.
  */
-const PIECES = [
-  { d: 'M496.68,415.43l106.28-106.28v-60.37c1.78-1.78-156.29,156.29-166.64,166.64h60.37Z', dx: -70, dy: -130, order: 0 },
-  { d: 'M852.76,415.31c-12.31-12.31-168.16-168.16-166.39-166.39v60.37l106.02,106.02h60.37Z', dx: 70, dy: -130, order: 1 },
-  { d: 'M881.45,443.83v60.53l104.44,104.44h59.76s-123.56-124.41-164.2-164.97Z', dx: 130, dy: -70, order: 2 },
-  { d: 'M881.45,856.4c44.37-44.37,159.47-159.47,158.83-158.83h-60.37l-98.46,98.46v60.37Z', dx: 130, dy: 70, order: 3 },
-  { d: 'M848.69,889.16h-59.86l-102.21,102.2v59.87l162.07-162.07Z', dx: 70, dy: 130, order: 4 },
-  { d: 'M440.63,889.02h59.87l102.21,102.21v59.87l-162.08-162.08Z', dx: -70, dy: 130, order: 5 },
-  { d: 'M407.88,795.9l-98.46-98.46h-60.37c-.64-.64,114.46,114.46,158.83,158.83v-60.37Z', dx: -130, dy: 70, order: 6 },
-  { d: 'M407.88,443.7c-40.64,40.56-164.2,164.97-164.2,164.97h59.76l104.44-104.44v-60.53Z', dx: -130, dy: -70, order: 7 },
-];
+import { SYMBOL_PIECES, SYMBOL_VIEWBOX } from '../mark';
+
+interface Props {
+  /**
+   * Plays the assembly entrance. Off for the small header mark, which appears
+   * mid-scroll — a fly-in there would read as a glitch, not an arrival.
+   */
+  animate?: boolean;
+  /** Empty makes the mark decorative, for use inside an already-labelled link. */
+  label?: string;
+}
+
+const { animate = true, label = 'The VIDIKA diamond mark' } = Astro.props;
 ---
 
 <svg
-  class="symbol"
-  viewBox="145 150 1000 1000"
-  role="img"
-  aria-label="The VIDIKA diamond mark"
+  class:list={['symbol', { 'symbol--static': !animate }]}
+  viewBox={SYMBOL_VIEWBOX}
+  role={label ? 'img' : undefined}
+  aria-label={label || undefined}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
 >
   <g class="symbol__pieces">
     {
-      PIECES.map((piece) => (
+      SYMBOL_PIECES.map((piece) => (
         <path
           class="symbol__piece"
           d={piece.d}
@@ -45,12 +48,18 @@ const PIECES = [
     color: var(--gold);
   }
 
+  /* Inherits the colour so a host can tint the mark on hover without
+     reaching into the pieces. */
   .symbol__piece {
-    fill: var(--gold);
+    fill: currentColor;
     transform-box: fill-box;
     transform-origin: center;
     animation: assemble calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
     animation-delay: calc((160ms + var(--order) * 70ms) * var(--motion));
+  }
+
+  .symbol--static .symbol__piece {
+    animation: none;
   }
 
   @keyframes assemble {

@@ -4,14 +4,34 @@ interface Props {
 }
 
 const { name } = Astro.props;
+
+/**
+ * All three boxes are 24 units tall and render at one height, so a y
+ * coordinate means the same pixel in every icon: the glyphs stand on 20.75 and
+ * the wordmark's baseline stands with them.
+ *
+ * IMDb's box is wider because a wordmark is wider. It was tried as a square —
+ * as a plate with the name cut out, the way the real logo is drawn — and at
+ * this size four letters get about four pixels each, which is under half of
+ * what a letterform needs to hold its shape. The square read as a gold smudge.
+ * Height and weight match here; only the footprint doesn't, and nothing fixes
+ * that while it stays a word rather than a glyph.
+ */
+const box = name === 'imdb' ? { w: 42, h: 24 } : { w: 24, h: 24 };
 ---
 
+{/* width/height are spelled out rather than left to the viewBox: an inline
+    <svg> carrying only a viewBox has no intrinsic size of its own, and WebKit
+    will not reliably derive one from the ratio — it renders the element at
+    zero width, which is invisible rather than merely wrong. */}
 <svg
-  class="social-icon"
-  viewBox="0 0 24 24"
+  class:list={['social-icon', `social-icon--${name}`]}
+  viewBox={`0 0 ${box.w} ${box.h}`}
+  width={box.w}
+  height={box.h}
   fill="none"
   stroke="currentColor"
-  stroke-width="1.6"
+  stroke-width="1.9"
   stroke-linecap="round"
   stroke-linejoin="round"
   aria-hidden="true"
@@ -19,55 +39,77 @@ const { name } = Astro.props;
 >
   {
     name === 'linkedin' && (
-      <>
-        <path d="M6.6 10v8.4" />
-        <path d="M6.6 6.1v.01" />
-        <path d="M11.1 18.4V10" />
-        <path d="M11.1 13.9c0-2.4 1.4-3.9 3.2-3.9s3.1 1.5 3.1 3.9v4.5" />
-      </>
+      /* Scaled about the baseline, not the centre, so it grows upward and its
+         feet stay level with everything else. This 6% is what sets the shared
+         cap height — the camera frame is drawn to match the 2.42 top it
+         produces, so changing it here means redrawing the frame there. */
+      <g transform="translate(12 19.8) scale(1.06) translate(-12 -19.8)">
+        <circle cx="5.1" cy="4.9" r="1.5" fill="currentColor" stroke="none" />
+        <path d="M5.1 9.6V19.8" />
+        <path d="M11.2 19.8V9.6" />
+        <path d="M11.2 14.2c0-2.6 1.7-4.6 4.1-4.6s4.1 2 4.1 4.6V19.8" />
+      </g>
     )
   }
   {
-    /* Stroked letterforms are unreadable at 18px, so IMDb keeps its badge:
-       a solid plate with knocked-out lettering. */
+    /* No plate behind it, and no pinned textLength — forcing the width would
+       squeeze the letterforms out of shape for as long as a fallback face
+       stands in for Jost. */
     name === 'imdb' && (
-      <>
-        <rect x="2" y="5.6" width="20" height="12.8" rx="2.6" fill="currentColor" stroke="none" />
-        <text
-          class="social-icon__imdb"
-          x="12"
-          y="14.5"
-          text-anchor="middle"
-          font-size="8.4"
-          font-weight="600"
-          stroke="none"
-        >
-          IMDb
-        </text>
-      </>
+      <text
+        class="social-icon__imdb"
+        x="21"
+        y="20.4"
+        text-anchor="middle"
+        font-size="17"
+        stroke="none"
+        fill="currentColor"
+        set:text="IMDb"
+      />
     )
   }
   {
+    /* Camera at the brand's own proportions: corner radius ~0.3 of the frame,
+       lens ~0.47 of it, and a solid flash rather than a capped zero-length
+       stroke — a dot shouldn't depend on linecap to exist.
+
+       The frame is drawn to a measured height rather than a round number: its
+       painted extent, stroke halo included, runs 2.42 → 20.75, which is exactly
+       what the scaled "in" beside it occupies. Sized here rather than by a
+       transform so the 1.9 stroke stays 1.9 — scaling the group would have
+       thickened it along with the frame. */
     name === 'instagram' && (
       <>
-        <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.2" />
-        <circle cx="12" cy="12" r="4" />
-        <path d="M17.1 6.9v.01" />
+        <rect x="3.79" y="3.37" width="16.43" height="16.43" rx="4.85" />
+        <circle cx="12" cy="11.59" r="3.42" />
+        <circle cx="16.63" cy="6.96" r="1.16" fill="currentColor" stroke="none" />
       </>
     )
   }
 </svg>
 
 <style>
+  /* Both axes spelled out, never `auto` — see the note above the <svg>. One
+     height for all three is what puts them on a shared baseline; the widths
+     are derived from it so the ratio can't drift from the viewBox. */
   .social-icon {
-    width: 1.125rem;
-    height: 1.125rem;
+    --icon-h: 1rem;
+
+    width: var(--icon-h);
+    height: var(--icon-h);
+  }
+
+  .social-icon--imdb {
+    width: calc(var(--icon-h) * 42 / 24);
+    /* The wordmark sets its own width, so nothing may crop it if a fallback
+       face runs wider than Jost. */
+    overflow: visible;
   }
 
   .social-icon__imdb {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    /* Knocked out of the plate, so it tracks the page ground, not the ink. */
-    fill: var(--ink-900);
+    /* Jost's stems at this size land on the 1.9-unit strokes beside them —
+       semibold would put the wordmark a weight ahead of the glyphs. */
+    font-weight: 500;
   }
 </style>

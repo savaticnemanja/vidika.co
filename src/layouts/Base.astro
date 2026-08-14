@@ -30,7 +30,7 @@ const { title, description, noindex, bodyClass } = Astro.props;
         have — see the entrance guard in global.css. WebKit suspends
         animations in a document that loads hidden (a background tab, a
         cmd-clicked link, a restored session), so the delay never elapses and
-        the header links, the mark and the wordmark sit at opacity 0 for as
+        the logo, the 404 mark and the scroll cue sit at opacity 0 for as
         long as the page lives. Park the entrance whenever it can't be
         trusted to run, and let it play once the page is actually seen. */}
     <script is:inline>
@@ -50,10 +50,13 @@ const { title, description, noindex, bodyClass } = Astro.props;
         }
 
         /* Backstop for any cause we haven't named: by now every entrance has
-           had time to finish, so nothing may still be on its opening frame. */
+           had time to finish, so nothing may still be on its opening frame.
+           Only elements an animation is the sole author of belong here — the
+           header's social links rest at opacity 0 by design while the hero is
+           on screen, and reading them as stuck would park the whole page. */
         setTimeout(() => {
           const held = document.querySelectorAll(
-            '.social, .symbol__piece, .wordmark__letter, .cue',
+            '.logo__piece, .logo__letter, .logo__tagline, .symbol__piece, .cue',
           );
 
           for (const el of held) {
@@ -73,6 +76,7 @@ const { title, description, noindex, bodyClass } = Astro.props;
     <meta name="format-detection" content="telephone=no" />
 
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />

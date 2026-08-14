@@ -7,8 +7,6 @@ import { CONTACT, SITE } from '../site.config';
   <div class="contact__inner">
     <h2 id="contact-title" class="contact__heading" data-reveal="rise">{CONTACT.heading}</h2>
 
-    <span class="contact__rule" data-reveal="rule" style="--reveal-delay:140ms" aria-hidden="true"></span>
-
     <form
       class="form"
       data-contact-form
@@ -18,25 +16,27 @@ import { CONTACT, SITE } from '../site.config';
       action={CONTACT.endpoint || `mailto:${SITE.email}`}
       novalidate
     >
-      <Field
-        id="contact-name"
-        name="name"
-        label={CONTACT.fields.name.label}
-        maxlength={CONTACT.fields.name.max}
-        autocomplete="name"
-        delay={220}
-      />
+      <div class="form__row">
+        <Field
+          id="contact-name"
+          name="name"
+          label={CONTACT.fields.name.label}
+          maxlength={CONTACT.fields.name.max}
+          autocomplete="name"
+          delay={220}
+        />
 
-      <Field
-        id="contact-email"
-        name="email"
-        type="email"
-        label={CONTACT.fields.email.label}
-        maxlength={CONTACT.fields.email.max}
-        autocomplete="email"
-        inputmode="email"
-        delay={300}
-      />
+        <Field
+          id="contact-email"
+          name="email"
+          type="email"
+          label={CONTACT.fields.email.label}
+          maxlength={CONTACT.fields.email.max}
+          autocomplete="email"
+          inputmode="email"
+          delay={300}
+        />
+      </div>
 
       <Field
         id="contact-message"
@@ -57,9 +57,14 @@ import { CONTACT, SITE } from '../site.config';
       <div class="form__actions" data-reveal="up" style="--reveal-delay:460ms">
         <button type="submit" class="submit" data-submit>
           <span class="submit__label" data-submit-label>Send message</span>
-          <svg class="submit__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M4 12.5 9.5 18 20 7" pathLength="100" />
-          </svg>
+
+          {/* Nothing beside the label until there is something to say: the tick
+              is the only mark, and it arrives with "Sent". */}
+          <span class="submit__icon" aria-hidden="true">
+            <svg class="submit__glyph submit__glyph--check" viewBox="0 0 24 24" focusable="false">
+              <path d="M4 12.5 9.5 18 20 7" pathLength="100" />
+            </svg>
+          </span>
         </button>
       </div>
 
@@ -74,12 +79,32 @@ import { CONTACT, SITE } from '../site.config';
 
 <style>
   .contact__inner {
+    /* One gap, everywhere: between the two columns, between the rows, under the
+       message, and under the button. Nothing inside the form is spaced by a
+       margin of its own, so there is a single number to tune and the rhythm
+       can't drift apart. Declared here rather than on the form so the address
+       below it can measure itself against the same unit; the short-viewport
+       rules tighten it in one place. */
+    --form-gap: clamp(0.65rem, 1.6vh, 1rem);
+
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 30rem;
+    /* The same measure the About column runs on, so the two content sections
+       are one width rather than two near-misses. */
+    max-width: 40rem;
     margin-inline: auto;
+  }
+
+  /* Where the rail is shown, the form is the one block wide enough to reach it:
+     keep 4.5rem clear on each side so a field edge never crowds the dots. Only
+     bites between 48em and ~57em — past that the measure above is the smaller
+     of the two anyway. */
+  @media (min-width: 48em) {
+    .contact__inner {
+      max-width: min(40rem, calc(100vw - 9rem));
+    }
   }
 
   .contact__heading {
@@ -90,19 +115,32 @@ import { CONTACT, SITE } from '../site.config';
     color: var(--bone);
   }
 
-  .contact__rule {
-    display: block;
-    width: 4.5rem;
-    height: 1px;
-    margin-block: clamp(0.75rem, 2.4vh, 1.5rem);
-    background: linear-gradient(to right, transparent, var(--gold), transparent);
-  }
-
   .form {
+    margin-block-start: var(--heading-gap);
     display: flex;
     flex-direction: column;
-    gap: clamp(0.4rem, 1.4vh, 0.9rem);
+    gap: var(--form-gap);
     width: 100%;
+  }
+
+  /* Name and email share a line on desktop — two short fields stacked make the
+     form read as longer than it is. One column below 48em, which is where the
+     rail also switches to its compact form. */
+  .form__row {
+    display: grid;
+    gap: var(--form-gap);
+  }
+
+  @media (min-width: 48em) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* A grid item's automatic minimum is the input's intrinsic width, which is
+       wider than half this form — without this the row overflows its measure. */
+    .form__row > :global(.field) {
+      min-width: 0;
+    }
   }
 
   .honeypot {
@@ -114,10 +152,6 @@ import { CONTACT, SITE } from '../site.config';
     white-space: nowrap;
   }
 
-  .form__actions {
-    margin-block-start: clamp(0.35rem, 1.4vh, 0.85rem);
-  }
-
   /* ── Submit ──────────────────────────────────────────────────────── */
 
   .submit {
@@ -125,12 +159,14 @@ import { CONTACT, SITE } from '../site.config';
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     width: 100%;
-    min-height: 3.25rem;
-    padding: 0.9rem var(--sp-6);
+    /* Level with the fields above it — still 44px, so it keeps the touch
+       target the smaller type would otherwise have given up. */
+    min-height: 2.75rem;
+    padding: 0.7rem var(--sp-6);
     font-family: var(--font-display);
-    font-size: var(--fs-base);
+    font-size: var(--fs-sm);
     font-weight: 300;
     letter-spacing: var(--tr-wider);
     text-transform: uppercase;
@@ -206,34 +242,57 @@ import { CONTACT, SITE } from '../site.config';
     cursor: not-allowed;
   }
 
-  .submit__check {
-    width: 1.15rem;
-    height: 1.15rem;
+  /* One cell, two marks stacked in it — see the button markup. */
+  /* Out of the flow until the send lands, so the idle button is its label and
+     nothing else — an empty slot beside it would push the label off centre by
+     half its own width. */
+  .submit__icon {
+    display: none;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .submit[data-state='sent'] .submit__icon {
+    display: grid;
+  }
+
+  .submit__glyph {
+    width: 100%;
+    height: 100%;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2.4;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .submit__glyph--check {
+    stroke-width: 2.2;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
     opacity: 0;
     transition: opacity var(--dur-1) linear;
   }
 
-  .submit[data-state='sent'] .submit__check {
+  .submit[data-state='sent'] .submit__glyph--check {
     opacity: 1;
     animation: draw-check calc(var(--dur-3) * var(--motion)) var(--ease-quart) forwards;
   }
 
+  /* Like the field errors, it takes no room until it has something to say, so
+     the button sits one gap above the address. When it does speak, its own
+     bottom padding keeps that gap below it too. */
   .form__status {
-    min-height: 1.2rem;
-    padding-block-start: 0.2rem;
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     letter-spacing: var(--tr-tight);
     line-height: 1.35;
     text-align: center;
     color: var(--bone-dim);
+  }
+
+  .form__status:not(:empty) {
+    padding-block-end: var(--form-gap);
   }
 
   .form__status[data-tone='error'] {
@@ -244,13 +303,31 @@ import { CONTACT, SITE } from '../site.config';
     color: var(--gold-lift);
   }
 
+  /* The site says everything small in Jost, light, on wide tracking — the
+     footer, the eyebrows, the field labels. This was the one italic serif on
+     the page, so it read as a quotation rather than an address. Left in
+     lowercase: an address is typed, not announced. */
+  /* The one place that doesn't take the plain form gap: this is the way round
+     the form, not part of it, so it gets three quarters of a gap on top of the
+     one already below the button. The top padding stays at zero so that margin
+     is the whole distance, rather than the margin plus its own leading; the
+     bottom padding is what the hover underline hangs from. */
   .contact__email {
     position: relative;
-    margin-block-start: clamp(0.5rem, 2vh, 1.25rem);
-    padding-block: 0.35rem;
-    font-family: var(--font-body);
-    font-size: var(--fs-md);
-    font-style: italic;
+    margin-block-start: calc(var(--form-gap) * 0.75);
+    padding-block: 0 0.35rem;
+    font-family: var(--font-display);
+    /* A step under the button's label: the form is the invitation, this is the
+       footnote to it. */
+    font-size: var(--fs-sm);
+    font-weight: 300;
+    /* The body's 1.7 would put half a line of leading above the address, which
+       reads as a bigger gap than the one the button sits on. */
+    line-height: 1.2;
+    letter-spacing: var(--tr-wide);
+    /* Tracking hangs off the last letter; the indent pays it back so the
+       centred underline below sits square under the address. */
+    text-indent: var(--tr-wide);
     color: var(--bone-soft);
     transition: color var(--dur-2) var(--ease-quart);
   }
@@ -297,20 +374,11 @@ import { CONTACT, SITE } from '../site.config';
      tighten the vertical rhythm so the whole section still lands as one
      viewport instead of pushing the footer past the fold. */
   @media (max-height: 820px) {
-    .contact__rule {
-      margin-block: clamp(0.4rem, 1.4vh, 0.85rem);
-    }
-
-    .form {
-      gap: clamp(0.3rem, 1vh, 0.6rem);
-    }
-
-    .form__actions {
-      margin-block-start: clamp(0.2rem, 1vh, 0.5rem);
-    }
-
-    .contact__email {
-      margin-block-start: clamp(0.25rem, 1.2vh, 0.65rem);
+    /* The heading keeps its shared --heading-gap here — the air under a heading
+       is the same everywhere, so it can't be the thing that shrinks. The form's
+       own rhythm gives up the height instead. */
+    .contact__inner {
+      --form-gap: clamp(0.5rem, 1.2vh, 0.7rem);
     }
   }
 
@@ -318,20 +386,8 @@ import { CONTACT, SITE } from '../site.config';
      still needs to fit — snap-stop only loosens under 620px, so 700px down
      to that line is still a hard lock. */
   @media (max-height: 700px) {
-    .contact__rule {
-      margin-block: clamp(0.3rem, 1vh, 0.6rem);
-    }
-
-    .form {
-      gap: clamp(0.2rem, 0.8vh, 0.4rem);
-    }
-
-    .form__actions {
-      margin-block-start: clamp(0.15rem, 0.8vh, 0.35rem);
-    }
-
-    .contact__email {
-      margin-block-start: clamp(0.2rem, 1vh, 0.45rem);
+    .contact__inner {
+      --form-gap: clamp(0.35rem, 0.9vh, 0.5rem);
     }
   }
 </style>

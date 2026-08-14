@@ -1,0 +1,63 @@
+# Build the image and push it to GHCR.
+#
+# Optional. docker-compose.yml builds on the server by default, which needs no
+# registry and no CI secrets — this exists for when you would rather build once
+# here and pull on the box. To switch, replace `build: .` in compose with
+#
+#   image: ghcr.io/${{ github.repository_owner }}/vidika-co:latest
+#
+# and deploy with `docker compose pull && docker compose up -d`.
+#
+# Deliberately not triggered on every push to main: a deploy should be a thing
+# you decide to do. Tag a release, or run it by hand from the Actions tab.
+#
+# The reference setup this is modelled on also POSTs an HMAC-signed webhook to
+# a listener on the server, which then pulls and recreates. That half is not
+# here because it needs a listener running on the box; the manual deploy in
+# README.md is two commands and does the same thing.
+
+name: Publish image
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/vidika-co
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # The runner is x86 and so is any ordinary VPS. Pinned rather than
+          # left to the host so that building from an Apple Silicon machine
+          # can never ship arm64 binaries to an amd64 server.
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

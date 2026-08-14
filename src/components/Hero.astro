@@ -1,27 +1,16 @@
 ---
-import Symbol from './Symbol.astro';
-import Wordmark from './Wordmark.astro';
+import Logo from './Logo.astro';
 import { SITE } from '../site.config';
 ---
 
 <section id="origin" class="panel hero" data-panel="origin" aria-labelledby="hero-title">
   <div class="hero__inner">
-    <div class="hero__symbol">
-      <Symbol />
-    </div>
-
     <h1 id="hero-title" class="hero__title">
-      <span class="visually-hidden">{SITE.name}</span>
-      <span class="hero__wordmark" aria-hidden="true">
-        <Wordmark />
+      <span class="visually-hidden">{SITE.name} — {SITE.tagline}</span>
+      <span class="hero__logo">
+        <Logo label="" />
       </span>
     </h1>
-
-    <p class="hero__tagline">
-      <span class="hero__rule" aria-hidden="true"></span>
-      {SITE.tagline}
-      <span class="hero__rule" aria-hidden="true"></span>
-    </p>
   </div>
 
   <a class="cue" href="#about">
@@ -37,46 +26,19 @@ import { SITE } from '../site.config';
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(1.75rem, 4.5vh, 3.25rem);
-  }
-
-  .hero__symbol {
-    width: clamp(9.75rem, 27.5vmin, 16rem);
   }
 
   .hero__title {
     margin: 0;
   }
 
-  .hero__wordmark {
+  /* One width for the whole lockup: the mark, the name and the line under it
+     hold the brand vector's own spacing, so there is nothing here to stack or
+     space by hand. Capped on height as well, since the logo is nearly as tall
+     as it is wide and the panel has a header and a footer to clear. */
+  .hero__logo {
     display: block;
-    width: clamp(15rem, 53vmin, 31rem);
-  }
-
-  .hero__tagline {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.75rem, 3vw, 1.75rem);
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 300;
-    line-height: 1;
-    letter-spacing: var(--tr-wider);
-    text-transform: uppercase;
-    color: var(--bone-soft);
-    white-space: nowrap;
-    animation: tagline-in calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
-    animation-delay: calc(1350ms * var(--motion));
-  }
-
-  /* Deco flanking rules that draw outward from the tagline. */
-  .hero__rule {
-    width: clamp(1.5rem, 7vw, 4rem);
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--line-strong), transparent);
-    transform-origin: center;
-    animation: rule-out calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
-    animation-delay: calc(1550ms * var(--motion));
+    width: min(clamp(15rem, 42vmin, 26rem), 62vh);
   }
 
   /* ── Scroll cue ──────────────────────────────────────────────────── */
@@ -122,20 +84,6 @@ import { SITE } from '../site.config';
     animation: bead calc(2200ms * var(--motion)) var(--ease-inout) infinite;
   }
 
-  @keyframes tagline-in {
-    from {
-      opacity: 0;
-      letter-spacing: var(--tr-widest);
-    }
-  }
-
-  @keyframes rule-out {
-    from {
-      opacity: 0;
-      transform: scaleX(0);
-    }
-  }
-
   @keyframes fade-up {
     from {
       opacity: 0;
@@ -143,6 +91,11 @@ import { SITE } from '../site.config';
     }
   }
 
+  /* The cue mirrors the gesture, not the direction of travel. A wheel is
+     pushed down to move the page down, so the bead falls; a touch screen is
+     swiped up to do the same, so on one the bead rises instead. Keyed to the
+     pointer rather than the width — it's the input that differs, not the
+     screen — matching the (pointer: fine) test motion.ts already makes. */
   @keyframes bead {
     0% {
       opacity: 0;
@@ -161,6 +114,33 @@ import { SITE } from '../site.config';
     100% {
       opacity: 0;
       transform: translateY(0.7rem);
+    }
+  }
+
+  @keyframes bead-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(0.7rem);
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    75% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+  }
+
+  @media (pointer: coarse) {
+    .cue__bead {
+      animation-name: bead-rise;
     }
   }
 

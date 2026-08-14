@@ -6,15 +6,13 @@ const ctaReady = ABOUT.cta.href !== '#';
 
 <section id="about" class="panel about" data-panel="about" aria-labelledby="about-title">
   <div class="about__inner">
-    <h2 id="about-title" class="about__heading" data-reveal="rise">{ABOUT.eyebrow}</h2>
+    <h2 id="about-title" class="visually-hidden">{ABOUT.heading}</h2>
 
-    <span class="about__rule" data-reveal="rule" style="--reveal-delay:160ms" aria-hidden="true"></span>
+    <p class="about__body" data-reveal="wipe">{ABOUT.body}</p>
 
-    <p class="about__body" data-reveal="wipe" style="--reveal-delay:260ms">{ABOUT.body}</p>
+    <p class="about__lead" data-reveal="up" style="--reveal-delay:260ms">{ABOUT.ctaLead}</p>
 
-    <p class="about__lead" data-reveal="up" style="--reveal-delay:520ms">{ABOUT.ctaLead}</p>
-
-    <div class="about__cta" data-reveal="up" style="--reveal-delay:660ms">
+    <div class="about__cta" data-reveal="up" style="--reveal-delay:400ms">
       {
         ctaReady ? (
           <a
@@ -52,25 +50,13 @@ const ctaReady = ABOUT.cta.href !== '#';
     text-align: center;
   }
 
-  .about__heading {
-    font-size: var(--fs-xl);
-    font-weight: 200;
-    letter-spacing: var(--tr-wide);
-    text-transform: uppercase;
-    color: var(--bone);
-  }
-
-  .about__rule {
-    display: block;
-    width: 4.5rem;
-    height: 1px;
-    margin-block: clamp(1rem, 3vh, 1.75rem);
-    background: linear-gradient(to right, transparent, var(--gold), transparent);
-  }
-
+  /* The section opens on the description — no heading, no flare above it, so
+     this is the first thing that lands, and it carries a display step rather
+     than a reading one. --measure still caps the line, but at this size 46ch
+     is wider than the column, so the container is what holds the wrap. */
   .about__body {
     max-width: var(--measure);
-    font-size: var(--fs-md);
+    font-size: var(--fs-lg);
     font-weight: 400;
     line-height: var(--lh-body);
     color: var(--bone-soft);

@@ -1,11 +1,12 @@
 ---
 import { SOCIALS, SITE } from '../site.config';
 import SocialIcon from './SocialIcon.astro';
+import Symbol from './Symbol.astro';
 ---
 
 <header class="header">
   <a class="header__mark" href="#origin" aria-label={`${SITE.name} — back to top`}>
-    <span class="header__mark-glyph" aria-hidden="true"></span>
+    <Symbol animate={false} label="" />
   </a>
 
   <nav class="header__social" aria-label="VIDIKA on social platforms">
@@ -22,8 +23,6 @@ import SocialIcon from './SocialIcon.astro';
             >
               <SocialIcon name={social.icon} />
               <span class="visually-hidden">{social.label} (opens in a new tab)</span>
-              <span class="social__tick social__tick--tl" aria-hidden="true"></span>
-              <span class="social__tick social__tick--br" aria-hidden="true"></span>
             </a>
           </li>
         ))
@@ -50,18 +49,24 @@ import SocialIcon from './SocialIcon.astro';
     pointer-events: auto;
   }
 
-  /* Small diamond that only appears once you've left the hero. */
+  /* The brand mark, at tab size, appearing once you've left the hero. The
+     negative margin pulls its 44px cell back against the shell edge, so the
+     symbol's leftmost point lands the same distance inside the shell as the
+     outermost social mark does on the other side. */
   .header__mark {
     display: grid;
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
     margin-inline-start: -0.6rem;
+    color: var(--gold);
     opacity: 0;
-    transform: scale(0.6) rotate(45deg);
+    transform: scale(0.6);
     transition:
       opacity var(--dur-3) var(--ease-expo),
-      transform var(--dur-3) var(--ease-expo);
+      transform var(--dur-3) var(--ease-expo),
+      color var(--dur-2) var(--ease-quart),
+      filter var(--dur-2) var(--ease-quart);
     pointer-events: none;
   }
 
@@ -74,24 +79,28 @@ import SocialIcon from './SocialIcon.astro';
      hero — rather than showing because the selector happened to match. */
   :global(body[data-section]:not([data-section='origin'])) .header__mark {
     opacity: 1;
-    transform: scale(1) rotate(45deg);
+    transform: scale(1);
     pointer-events: auto;
   }
 
-  .header__mark-glyph {
-    width: 0.85rem;
-    height: 0.85rem;
-    border: 1px solid var(--gold);
-    transition:
-      background-color var(--dur-2) var(--ease-quart),
-      box-shadow var(--dur-2) var(--ease-quart);
+  /* Takes its colour from the link so the hover state can reach the pieces —
+     the component's own `color` would otherwise stop it at the <svg>. The
+     width is the diamond itself, edge to edge, since the mark is cropped to its
+     own ink — level with the social glyphs opposite. */
+  .header__mark :global(.symbol) {
+    width: 1.12rem;
+    color: inherit;
   }
 
-  .header__mark:hover .header__mark-glyph {
-    background-color: var(--gold);
-    box-shadow: 0 0 16px -2px rgb(183 137 55 / 70%);
+  .header__mark:hover,
+  .header__mark:focus-visible {
+    color: var(--gold-lift);
+    filter: drop-shadow(0 0 10px rgb(183 137 55 / 55%));
   }
 
+  /* No pull on this side: a bordered box aligns by its border, which sits on
+     the shell edge already. Only the bare mark opposite needs an optical
+     correction to look level with it. */
   .header__list {
     display: flex;
     gap: var(--sp-2);
@@ -101,20 +110,63 @@ import SocialIcon from './SocialIcon.astro';
   }
 
   .social {
+    /* The mark's entrance, offset per icon so the row arrives as a run rather
+       than a block. --i is set on each link in the markup. */
+    --social-delay: calc(var(--i) * 70ms * var(--motion));
+
     position: relative;
     display: grid;
     place-items: center;
-    /* 44px minimum touch target. */
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.375rem;
+    height: 2.375rem;
     color: var(--gold);
+    /* Opaque, not a wash: the header is fixed over whatever scrolls beneath it,
+       and a see-through box lets section content read through the mark. */
+    background-color: var(--ink-900);
     border: 1px solid var(--line);
     transition:
+      opacity var(--dur-3) var(--ease-expo) var(--social-delay),
+      scale var(--dur-3) var(--ease-expo) var(--social-delay),
       color var(--dur-2) var(--ease-quart),
       border-color var(--dur-2) var(--ease-quart),
       background-color var(--dur-2) var(--ease-quart);
-    animation: drop-in calc(var(--dur-4) * var(--motion)) var(--ease-expo) backwards;
-    animation-delay: calc((1000ms + var(--i) * 90ms) * var(--motion));
+  }
+
+  /* The resting state, scoped to .js on the same rule as the reveal primitives
+     in global.css: what brings these back is an attribute a script writes, so
+     with no script to write it the hidden state is permanent. The mark opposite
+     can afford that — it is a second way back to the top — but this is the only
+     route to the profiles, so without JS the row simply stays up.
+
+     The individual `scale`, not a transform: the press state below is a
+     transform, and one declaration would overwrite the other. These compose
+     instead, so a pressed icon is 0.94 of its revealed size. */
+  :global(html.js) .social {
+    opacity: 0;
+    scale: 0.6;
+    pointer-events: none;
+  }
+
+  /* Shown on the same terms as the mark opposite — see the note there for why
+     the attribute has to be present rather than merely not 'origin'.
+
+     The focus clause is what keeps them reachable while the hero is on screen:
+     they are hidden, not removed, so a keyboard still tabs into them, and
+     landing on something invisible is a dead end. Tabbing in reveals the row. */
+  :global(body[data-section]:not([data-section='origin'])) .social,
+  .header__social:focus-within .social {
+    opacity: 1;
+    scale: 1;
+    pointer-events: auto;
+  }
+
+  /* Keeps the 44px pointer target the smaller visible box gives up — 3px of
+     invisible reach on each side, which is still 2px clear of its neighbour's
+     across the gap. */
+  .social::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
   }
 
   .social :global(.social-icon) {
@@ -125,7 +177,9 @@ import SocialIcon from './SocialIcon.astro';
   .social:focus-visible {
     color: var(--gold-lift);
     border-color: var(--line-strong);
-    background-color: var(--gold-wash);
+    /* The same 12% gold as --gold-wash, mixed into the ground rather than laid
+       over it, so the hover state stays opaque too. */
+    background-color: color-mix(in srgb, var(--gold) 12%, var(--ink-900));
   }
 
   .social:hover :global(.social-icon) {
@@ -134,49 +188,5 @@ import SocialIcon from './SocialIcon.astro';
 
   .social:active {
     transform: scale(0.94);
-  }
-
-  /* Deco corner ticks that extend on hover. */
-  .social__tick {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    border: 0 solid var(--gold-lift);
-    opacity: 0;
-    transition:
-      opacity var(--dur-2) var(--ease-quart),
-      inset var(--dur-3) var(--ease-expo);
-  }
-
-  .social__tick--tl {
-    inset: 4px auto auto 4px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-  }
-
-  .social__tick--br {
-    inset: auto 4px 4px auto;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-  }
-
-  .social:hover .social__tick,
-  .social:focus-visible .social__tick {
-    opacity: 1;
-  }
-
-  .social:hover .social__tick--tl {
-    inset: -1px auto auto -1px;
-  }
-
-  .social:hover .social__tick--br {
-    inset: auto -1px -1px auto;
-  }
-
-  @keyframes drop-in {
-    from {
-      opacity: 0;
-      transform: translate3d(0, -0.75rem, 0);
-    }
   }
 </style>

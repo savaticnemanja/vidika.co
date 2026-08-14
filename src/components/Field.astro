@@ -63,14 +63,6 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
 
     <label for={id} class="field__label">{label}</label>
 
-    <span class="field__corner field__corner--tl" aria-hidden="true"></span>
-    <span class="field__corner field__corner--tr" aria-hidden="true"></span>
-    <span class="field__corner field__corner--bl" aria-hidden="true"></span>
-    <span class="field__corner field__corner--br" aria-hidden="true"></span>
-  </div>
-
-  <div class="field__meta">
-    <p id={errorId} class="field__error" data-error-for={id}></p>
     {
       counter && (
         <span id={countId} class="field__count" data-counter-for={id}>
@@ -78,12 +70,35 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
         </span>
       )
     }
+
+    <span class="field__corner field__corner--tl" aria-hidden="true"></span>
+    <span class="field__corner field__corner--tr" aria-hidden="true"></span>
+    <span class="field__corner field__corner--bl" aria-hidden="true"></span>
+    <span class="field__corner field__corner--br" aria-hidden="true"></span>
   </div>
+
+  {/* Empty until something is wrong, and taking no room while it is — the
+      fields sit as one stack, not as boxes with a reserved line each. */}
+  <p id={errorId} class="field__error" data-error-for={id}></p>
 </div>
 
 <style>
   .field {
+    /* One size for the label and for the value it stands in for — a resting
+       label that doesn't match the text replacing it jumps on the first
+       keystroke. */
+    --field-fs: var(--fs-sm);
+
     position: relative;
+  }
+
+  /* iOS Safari zooms the page whenever a focused control is under 16px, and
+     nothing zooms back out. Touch keeps the larger step; it is the one place
+     where the smaller size costs more than it buys. */
+  @media (pointer: coarse) {
+    .field {
+      --field-fs: var(--fs-base);
+    }
   }
 
   .field__box {
@@ -93,10 +108,10 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
   .field__control {
     display: block;
     width: 100%;
-    min-height: 3.25rem;
-    padding: 1.35rem var(--sp-4) 0.55rem;
+    min-height: 2.75rem;
+    padding: 1.1rem var(--sp-4) 0.4rem;
     font-family: var(--font-display);
-    font-size: var(--fs-base);
+    font-size: var(--field-fs);
     font-weight: 300;
     letter-spacing: var(--tr-tight);
     color: var(--bone);
@@ -111,9 +126,9 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
   }
 
   .field__control--area {
-    min-height: clamp(5.5rem, 17vh, 9rem);
-    padding-top: 1.6rem;
-    line-height: 1.6;
+    min-height: clamp(4rem, 11.5vh, 6.25rem);
+    padding-top: 1.3rem;
+    line-height: 1.55;
     resize: none;
   }
 
@@ -130,10 +145,10 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
   /* Floating label — pure CSS, driven by :placeholder-shown. */
   .field__label {
     position: absolute;
-    top: 1rem;
+    top: 0.85rem;
     left: calc(var(--sp-4) + 1px);
     font-family: var(--font-display);
-    font-size: var(--fs-base);
+    font-size: var(--field-fs);
     font-weight: 300;
     letter-spacing: var(--tr-wide);
     text-transform: uppercase;
@@ -147,7 +162,7 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
 
   .field__control:focus + .field__label,
   .field__control:not(:placeholder-shown) + .field__label {
-    transform: translateY(-0.62rem) scale(0.72);
+    transform: translateY(-0.56rem) scale(0.72);
   }
 
   .field__control:focus + .field__label {
@@ -221,17 +236,8 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
     box-shadow: 0 0 0 1px rgb(199 106 90 / 45%), 0 0 24px -6px rgb(199 106 90 / 55%);
   }
 
-  .field__meta {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--sp-3);
-    min-height: 1.1rem;
-    padding-block-start: 0.3rem;
-    padding-inline: 2px;
-  }
-
   .field__error {
+    padding-inline: 2px;
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     line-height: 1.2;
@@ -244,14 +250,21 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
       transform var(--dur-2) var(--ease-expo);
   }
 
+  /* Half the form's gap, so the message hangs off the field it belongs to
+     rather than floating midway to the next one. */
   .field__error:not(:empty) {
+    padding-block-start: calc(var(--form-gap, 0.6rem) / 2);
     opacity: 1;
     transform: none;
   }
 
+  /* Rides in the strip the floated label leaves free at the top of the box,
+     rather than on a line of its own below it — it appears on focus, which is
+     exactly when the label has moved up out of its way. */
   .field__count {
-    flex-shrink: 0;
-    margin-inline-start: auto;
+    position: absolute;
+    top: 0.38rem;
+    right: calc(var(--sp-4) + 1px);
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     font-variant-numeric: tabular-nums;
@@ -259,6 +272,7 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
     color: var(--bone-dim);
     opacity: 0;
     transition: opacity var(--dur-2) var(--ease-quart);
+    pointer-events: none;
   }
 
   .field:focus-within .field__count {
@@ -270,52 +284,51 @@ const describedBy = counter ? `${errorId} ${countId}` : errorId;
      need an explicit floor to stop the form from outgrowing one screen. */
   @media (max-height: 820px) {
     .field__control {
-      min-height: 2.75rem;
-      padding-block: 1.1rem 0.4rem;
+      min-height: 2.45rem;
+      padding-block: 0.95rem 0.35rem;
     }
 
     .field__control--area {
-      min-height: clamp(4rem, 11vh, 6.5rem);
-      padding-top: 1.35rem;
+      min-height: clamp(3.5rem, 9.5vh, 5.5rem);
+      padding-top: 1.15rem;
     }
 
     .field__label {
-      top: 0.85rem;
+      top: 0.75rem;
     }
 
     .field__control:focus + .field__label,
     .field__control:not(:placeholder-shown) + .field__label {
-      transform: translateY(-0.56rem) scale(0.72);
+      transform: translateY(-0.5rem) scale(0.72);
     }
 
-    .field__meta {
-      min-height: 0.9rem;
-      padding-block-start: 0.2rem;
+    .field__count {
+      top: 0.3rem;
     }
   }
 
   @media (max-height: 700px) {
     .field__control {
-      min-height: 2.4rem;
-      padding-block: 0.85rem 0.3rem;
+      min-height: 2.25rem;
+      padding-block: 0.82rem 0.28rem;
     }
 
     .field__control--area {
-      min-height: clamp(2.85rem, 7.5vh, 5rem);
-      padding-top: 1.05rem;
+      min-height: clamp(2.7rem, 7vh, 4.5rem);
+      padding-top: 0.98rem;
     }
 
     .field__label {
-      top: 0.7rem;
+      top: 0.66rem;
     }
 
     .field__control:focus + .field__label,
     .field__control:not(:placeholder-shown) + .field__label {
-      transform: translateY(-0.5rem) scale(0.7);
+      transform: translateY(-0.46rem) scale(0.7);
     }
 
-    .field__meta {
-      min-height: 0.75rem;
+    .field__count {
+      top: 0.24rem;
     }
   }
 </style>

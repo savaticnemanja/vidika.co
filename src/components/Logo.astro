@@ -1,0 +1,189 @@
+---
+/**
+ * The full VIDIKA logo — diamond, name, and CREATIVE ORIGINS beneath it — drawn
+ * straight from the brand vector, in one SVG and one coordinate system. Every
+ * gap and proportion is the vector's own (see src/mark.ts); the only thing this
+ * component adds is the entrance: the diamond assembles, the name rises, the
+ * line fades up, and a sheen sweeps the metal once things have settled.
+ */
+import { LOGO_DIAMOND, LOGO_WORDMARK, LOGO_TAGLINE, LOGO_VIEWBOX } from '../mark';
+
+interface Props {
+  /**
+   * Plays the entrance. Off wherever the logo is a masthead rather than an
+   * arrival — on a document that opens with it, assembling itself is theatre
+   * the reader didn't ask for.
+   */
+  animate?: boolean;
+  /** Empty makes the logo decorative, for use inside an already-labelled host. */
+  label?: string;
+}
+
+const { animate = true, label = 'VIDIKA — Creative Origins' } = Astro.props;
+---
+
+<svg
+  class:list={['logo', { 'logo--static': !animate }]}
+  viewBox={LOGO_VIEWBOX}
+  role={label ? 'img' : undefined}
+  aria-label={label || undefined}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <defs>
+    <clipPath id="logo-name-clip">
+      {LOGO_WORDMARK.map((d) => <path d={d} />)}
+    </clipPath>
+
+    <linearGradient id="logo-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff3d6" stop-opacity="0" />
+      <stop offset="50%" stop-color="#fff8e6" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#fff3d6" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <g class="logo__diamond">
+    {
+      LOGO_DIAMOND.map((piece) => (
+        <path
+          class="logo__piece"
+          d={piece.d}
+          style={`--dx:${piece.dx}px; --dy:${piece.dy}px; --order:${piece.order}`}
+        />
+      ))
+    }
+  </g>
+
+  <g class="logo__name">
+    {LOGO_WORDMARK.map((d, i) => <path class="logo__letter" d={d} style={`--order:${i}`} />)}
+  </g>
+
+  <g class="logo__tagline">
+    {LOGO_TAGLINE.map((d) => <path d={d} />)}
+  </g>
+
+  <g clip-path="url(#logo-name-clip)" aria-hidden="true">
+    <rect class="logo__sheen" x="-200" y="820" width="210" height="146" fill="url(#logo-sheen)" />
+  </g>
+</svg>
+
+<style>
+  .logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* The chevrons start outside the crop, so the entrance must not clip. */
+    overflow: visible;
+    color: var(--gold);
+  }
+
+  .logo__piece,
+  .logo__letter,
+  .logo__tagline {
+    fill: currentColor;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .logo__piece {
+    animation: assemble calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc((160ms + var(--order) * 70ms) * var(--motion));
+  }
+
+  .logo__letter {
+    animation: letter-rise calc(var(--dur-5) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc((820ms + var(--order) * 80ms) * var(--motion));
+  }
+
+  /* One block, not fifteen letters: at this size the line reads as a rule of
+     type, and staggering it would pull the eye across it letter by letter. */
+  .logo__tagline {
+    animation: tagline-in calc(var(--dur-6) * var(--motion)) var(--ease-expo) backwards;
+    animation-delay: calc(1350ms * var(--motion));
+  }
+
+  /* fill-box, like everything else here: without it the skew pivots on the
+     centre of the view box, which sits 240 units above the letters and drags
+     the band that far off its own path — far enough that the sweep ran out of
+     travel and died on the K. Pivoting on the band's own centre, which is level
+     with the letters, keeps it where the numbers below put it.
+
+     Linear, and not an ease: the geometry either clears the word at full
+     opacity or it doesn't, and an ease that front-loads the travel makes that
+     depend on the easing curve. The long dwell comes from the 7s cycle. */
+  .logo__sheen {
+    transform-box: fill-box;
+    transform-origin: center;
+    mix-blend-mode: screen;
+    animation: sheen-sweep calc(7000ms * var(--motion)) linear infinite;
+    animation-delay: calc(2200ms * var(--motion));
+  }
+
+  .logo--static .logo__piece,
+  .logo--static .logo__letter,
+  .logo--static .logo__tagline {
+    animation: none;
+  }
+
+  .logo--static .logo__sheen {
+    display: none;
+  }
+
+  @keyframes assemble {
+    from {
+      opacity: 0;
+      transform: translate(calc(var(--dx) * 2.6), calc(var(--dy) * 2.6)) rotate(-8deg);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0);
+    }
+  }
+
+  @keyframes letter-rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+
+  @keyframes tagline-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  /* Long dwell, quick sweep — a highlight catching the metal, not a loop.
+     The band is 210 wide and starts at -200, so it is clear of the first letter
+     (226) until 4%, and its trailing edge is past the last (1082) by 26% — both
+     fades happen off the word, and every letter is crossed at full opacity. Any
+     change to the rect's x/width or to this travel has to keep that true. */
+  @keyframes sheen-sweep {
+    0% {
+      transform: translateX(0) skewX(-18deg);
+      opacity: 0;
+    }
+
+    4% {
+      opacity: 1;
+    }
+
+    26% {
+      opacity: 1;
+    }
+
+    32%,
+    100% {
+      transform: translateX(1600px) skewX(-18deg);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo__sheen {
+      display: none;
+    }
+  }
+</style>

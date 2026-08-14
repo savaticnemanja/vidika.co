@@ -11,8 +11,13 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "deploy": "astro build && bash scripts/deploy.sh",
+    "serve": "astro build && node --env-file-if-exists=.env server/index.mjs",
+    "smoke": "node scripts/smoke-contact.mjs",
     "gen:assets": "node scripts/generate-assets.mjs",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --build",
+    "docker:logs": "docker compose logs -f",
+    "docker:down": "docker compose down",
     "astro": "astro"
   },
   "dependencies": {

@@ -3,10 +3,14 @@
  *
  *   node scripts/generate-assets.mjs
  *
- * Outputs into public/: favicon.svg, favicon.ico, apple-touch-icon.png,
- * icon-192.png, icon-512.png, icon-maskable-512.png, og.png.
+ * Outputs into public/: favicon.svg, favicon-96.png, favicon.ico,
+ * apple-touch-icon.png, icon-192.png, icon-512.png, icon-maskable-512.png,
+ * og.png — all of them committed, so this only runs when the artwork changes.
  *
- * Re-run this whenever the brand vectors in assets/ change.
+ * The two source vectors live in brand/ beside this script, under the names
+ * they carry in the brand package. They are the gold-on-transparent web cuts
+ * of the symbol and the full lockup; the rest of that package — the other
+ * colourways, and the AI/PDF/PNG masters — is not kept in this repo.
  */
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -14,7 +18,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const here = dirname(fileURLToPath(import.meta.url));
+const root = join(here, '..');
 const pub = join(root, 'public');
 
 /* The two theme colours: the logo gold and the brand navy ground. */
@@ -23,8 +28,8 @@ const INK = '#0a131f';
 const NAVY = '#122238';
 
 const SRC = {
-  symbol: join(root, 'assets/VIDIKA_SYMBOL/SVG/VIDIKA_SYMBOL_GOLD_RGB_WEB.svg'),
-  fullLogo: join(root, 'assets/VIDIKA_FULL_LOGO/SVG/VIDIKA_FULL_LOGO_GOLD_RGB_WEB.svg'),
+  symbol: join(here, 'brand/VIDIKA_SYMBOL_GOLD_RGB_WEB.svg'),
+  fullLogo: join(here, 'brand/VIDIKA_FULL_LOGO_GOLD_RGB_WEB.svg'),
 };
 
 /** Tight content bounds measured from the source vectors (viewBox 0 0 1300 1300). */
@@ -55,12 +60,18 @@ function fitTransform(bounds, boxW, boxH, inset = 0) {
   return `translate(${tx.toFixed(3)} ${ty.toFixed(3)}) scale(${scale.toFixed(6)})`;
 }
 
-/** Square icon: gold symbol on ink, optionally rounded. */
-async function iconSvg({ size, inset, radius }) {
+/**
+ * Square icon: the gold symbol, on ink or on nothing.
+ *
+ * `ground: false` leaves the background transparent, so the mark sits on
+ * whatever the client paints behind it — a browser tab strip, light or dark.
+ */
+async function iconSvg({ size, inset, radius, ground = true }) {
   const shapes = await shapesOf(SRC.symbol);
   const transform = fitTransform(BOUNDS.symbol, size, size, inset);
-  const rect =
-    radius > 0
+  const rect = !ground
+    ? ''
+    : radius > 0
       ? `<rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="${INK}"/>`
       : `<rect width="${size}" height="${size}" fill="${INK}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
@@ -125,17 +136,28 @@ async function png(svg, size) {
 async function main() {
   await mkdir(pub, { recursive: true });
 
-  // Scalable favicon — rounded so it reads as a mark in the tab strip.
-  const faviconSvg = await iconSvg({ size: 512, inset: 0.14, radius: 96 });
+  /* Browser favicons carry no ground of their own: the bare symbol, sized to
+     fill the tab, so it reads as the mark rather than as a navy tile. Every
+     format below is the same artwork, so the tab looks identical whichever
+     one a given browser reaches for. */
+
+  // Scalable favicon — what every current browser actually uses.
+  const faviconSvg = await iconSvg({ size: 512, inset: 0.02, radius: 0, ground: false });
   await writeFile(join(pub, 'favicon.svg'), faviconSvg);
 
+  // Raster favicon for clients that don't take SVG.
+  await writeFile(join(pub, 'favicon-96.png'), await png(faviconSvg, 96));
+
   // Legacy .ico for bookmarks and older clients.
-  const icoSource = await iconSvg({ size: 256, inset: 0.1, radius: 0 });
   const icoSizes = [16, 32, 48];
   const icoPngs = await Promise.all(
-    icoSizes.map(async (size) => ({ size, data: await png(icoSource, size) })),
+    icoSizes.map(async (size) => ({ size, data: await png(faviconSvg, size) })),
   );
   await writeFile(join(pub, 'favicon.ico'), buildIco(icoPngs));
+
+  /* Installed-app icons keep the ink ground: iOS composites a transparent
+     home-screen icon onto black, and a maskable icon must fill its whole
+     safe zone — neither survives being cut out. */
 
   // iOS home screen — opaque, no rounding (iOS masks it itself).
   const touchSvg = await iconSvg({ size: 512, inset: 0.16, radius: 0 });

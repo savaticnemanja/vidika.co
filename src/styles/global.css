@@ -142,6 +142,68 @@ p {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   Cursor — the pointer drawn in the brand's own metal
+
+   Three marks: the arrow at rest, the arrow in the lift gold with the
+   brand's diamond beside it wherever something can be clicked, and a gold
+   I-beam in the form. Each carries a --ink-1000 outline under its fill
+   (paint-order: stroke), which is what keeps it visible where it crosses
+   the one gold field on the page — the submit button's hover sweep.
+
+   The colours are written out rather than pulled from the tokens: a data
+   URI is an opaque string to CSS, so a custom property can't reach inside
+   it. They are --gold, --gold-lift and --ink-1000; a change there has to be
+   made here too.
+
+   Two declarations per cursor, not one. The plain url() is the one every
+   engine understands; the image-set() below it hands Safari a face drawn at
+   twice the size, which it needs because it rasterises an SVG cursor once,
+   at 1x, and scales that bitmap up on a Retina display. Where image-set
+   isn't understood in this position the second declaration is simply
+   dropped and the first still stands. The two SVGs differ in nothing but
+   the width and height they declare — the view box, and so the hotspot,
+   is the same 24 units either way.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cursor-arrow-1x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 1.5 4 18.8 8 14.7 10.9 21 13.8 19.9 10.9 13.6 16.1 13.6Z' fill='%23b78937' stroke='%23070d15' stroke-width='1.4' paint-order='stroke'/%3E%3C/svg%3E");
+  --cursor-arrow-2x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M4 1.5 4 18.8 8 14.7 10.9 21 13.8 19.9 10.9 13.6 16.1 13.6Z' fill='%23b78937' stroke='%23070d15' stroke-width='1.4' paint-order='stroke'/%3E%3C/svg%3E");
+
+  --cursor-hand-1x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='%23d6a44f' stroke='%23070d15' stroke-width='1.4' paint-order='stroke'%3E%3Cpath d='M4 1.5 4 18.8 8 14.7 10.9 21 13.8 19.9 10.9 13.6 16.1 13.6Z'/%3E%3Cpath d='M18.6 1.4 22.6 5.4 18.6 9.4 14.6 5.4Z'/%3E%3C/g%3E%3C/svg%3E");
+  --cursor-hand-2x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cg fill='%23d6a44f' stroke='%23070d15' stroke-width='1.4' paint-order='stroke'%3E%3Cpath d='M4 1.5 4 18.8 8 14.7 10.9 21 13.8 19.9 10.9 13.6 16.1 13.6Z'/%3E%3Cpath d='M18.6 1.4 22.6 5.4 18.6 9.4 14.6 5.4Z'/%3E%3C/g%3E%3C/svg%3E");
+
+  --cursor-text-1x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M9 4.6h6M12 4.6v14.8M9 19.4h6' stroke='%23070d15' stroke-width='3.6'/%3E%3Cpath d='M9 4.6h6M12 4.6v14.8M9 19.4h6' stroke='%23b78937' stroke-width='1.7'/%3E%3C/g%3E%3C/svg%3E");
+  --cursor-text-2x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M9 4.6h6M12 4.6v14.8M9 19.4h6' stroke='%23070d15' stroke-width='3.6'/%3E%3Cpath d='M9 4.6h6M12 4.6v14.8M9 19.4h6' stroke='%23b78937' stroke-width='1.7'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* The hotspot is the tip, in the view box's own units. */
+html {
+  cursor: var(--cursor-arrow-1x) 4 2, auto;
+  cursor: image-set(var(--cursor-arrow-1x) 1x, var(--cursor-arrow-2x) 2x) 4 2, auto;
+}
+
+/* Labels are excluded on purpose: the only ones on the page float over their
+   own field, where the I-beam belongs. They can't be reached anyway — see
+   the pointer-events on .field__label. */
+a,
+button,
+summary,
+[role='button'] {
+  cursor: var(--cursor-hand-1x) 4 2, pointer;
+  cursor: image-set(var(--cursor-hand-1x) 1x, var(--cursor-hand-2x) 2x) 4 2, pointer;
+}
+
+/* Centred on the bar, not on a corner: an I-beam points at nothing. */
+input,
+textarea {
+  cursor: var(--cursor-text-1x) 12 12, text;
+  cursor: image-set(var(--cursor-text-1x) 1x, var(--cursor-text-2x) 2x) 12 12, text;
+}
+
+/* The states that say something the mark can't — sending, done, refused —
+   keep the system cursor that carries that meaning. See Contact.astro. */
+
+/* ═══════════════════════════════════════════════════════════════════════
    Focus — one visible, consistent ring everywhere
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -278,10 +340,10 @@ p {
    Entrance guard
    Every entrance animation holds its opening frame for the length of its
    delay (animation-fill-mode: backwards), which makes that frame — opacity 0
-   — the only thing standing between the header links, the mark and the
-   wordmark and being invisible. An engine that never runs the animation, and
-   WebKit suspends them in a document that loads hidden, keeps them there for
-   the life of the page.
+   — the only thing standing between the logo, the 404 mark and the scroll cue
+   and being invisible. An engine that never runs the animation, and WebKit
+   suspends them in a document that loads hidden, keeps them there for the life
+   of the page.
 
    Dropping the animation is the only way out: a suspended animation never
    runs at any duration, so shortening it leaves the fill holding. The guard
@@ -296,7 +358,7 @@ html.entry-hold *::after {
 
 /* Takes its finished state from the animation itself rather than from its
    own rules, so parking it means spelling that state out. */
-html.entry-hold .wordmark__sheen {
+html.entry-hold .logo__sheen {
   display: none;
 }
 
@@ -329,10 +391,6 @@ html.entry-hold .wordmark__sheen {
   --wipe: 0%;
   opacity: 1;
   mask-image: linear-gradient(to bottom, #000 0 var(--wipe), transparent var(--wipe));
-}
-
-.js [data-reveal='rule'] {
-  transform: scaleX(0);
 }
 
 .js [data-reveal='fade'] {

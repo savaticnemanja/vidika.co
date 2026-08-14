@@ -1,0 +1,15 @@
+{
+  "name": "vidika-server",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serves the built site and takes the contact form. See README.md.",
+  "//": "Declares one optional dependency and nothing else. The Resend transport runs on fetch, so the default path installs nothing and the runtime image carries no node_modules — nodemailer is pulled in only by MAIL_TRANSPORT=smtp, with `npm ci` here and the commented lines in the Dockerfile. Scripts live in the root package.json: `npm run serve` runs this, `npm run smoke` exercises it.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "main": "index.mjs",
+  "optionalDependencies": {
+    "nodemailer": "^9.0.5"
+  }
+}

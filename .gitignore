@@ -14,8 +14,14 @@ pnpm-debug.log*
 
 
 # environment variables
+# .env at the repo root is front-end config locally, and the compose env file
+# on the server — both hold secrets, neither is ever committed.
 .env
 .env.production
+server/.env
+# Left over from the Cloudflare setup; still holds a Resend key until you
+# move it into .env and delete the file.
+.dev.vars
 
 # macOS-specific files
 .DS_Store

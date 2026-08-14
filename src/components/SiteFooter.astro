@@ -12,17 +12,10 @@ const years = copyrightYears();
     {SITE.legalName}. All rights reserved.
   </p>
 
-  <p class="footer__credit">
-    Developed by
-    <a
-      class="footer__credit-link"
-      href="https://nemanjas.dev"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      nemanjas.dev
-      <span class="visually-hidden">(opens in a new tab)</span>
-    </a>
+  {/* The form no longer carries the GDPR art. 13 pointer — it lives here,
+      reachable from every page. */}
+  <p class="footer__legal">
+    <a href="/privacy-notice">Privacy Notice</a>
   </p>
 </footer>
 
@@ -33,77 +26,60 @@ const years = copyrightYears();
     position: relative;
     z-index: var(--z-content);
     display: grid;
-    gap: var(--sp-2);
     place-items: center;
+    gap: 0.1rem;
     min-height: var(--footer-block);
     padding-inline: var(--shell-x);
     padding-block-end: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Both lines run tight, and the gap above is small, so the leading is what
+     you would actually be seeing between them: the body's 1.7 on the link and
+     1.4 here were adding some 7px of air before the gap even began. Still loose
+     enough to read on the narrow screens where the legal name wraps to two. */
   .footer__text {
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     font-weight: 300;
-    line-height: 1.4;
+    line-height: 1.2;
     letter-spacing: var(--tr-wide);
     color: var(--bone-dim);
     text-align: center;
     text-wrap: balance;
   }
 
-  .footer__credit {
+  .footer__legal {
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     font-weight: 300;
-    letter-spacing: var(--tr-wide);
+    /* Single line, so it can run at the type's own height — nothing above the
+       ascenders here is doing any work. */
+    line-height: 1.05;
+    letter-spacing: var(--tr-tight);
     color: var(--bone-dim);
-    opacity: 0.68;
+    opacity: 0.85;
   }
 
-  .footer__credit-link {
-    position: relative;
+  .footer__legal a {
     color: inherit;
-    transition: color var(--dur-2) var(--ease-quart);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 0.2em;
+    transition:
+      color var(--dur-2) var(--ease-quart),
+      text-decoration-color var(--dur-2) var(--ease-quart);
   }
 
-  .footer__credit-link::after {
-    content: '';
-    position: absolute;
-    inset: auto 0 -2px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transition: transform var(--dur-3) var(--ease-expo);
-  }
-
-  .footer__credit-link:hover,
-  .footer__credit-link:focus-visible {
+  .footer__legal a:hover,
+  .footer__legal a:focus-visible {
     color: var(--gold-lift);
-  }
-
-  .footer__credit-link:hover::after,
-  .footer__credit-link:focus-visible::after {
-    transform: scaleX(1);
+    text-decoration-color: currentColor;
   }
 
   /* The legal name wraps to two lines on narrow screens — give it the room. */
   @media (max-width: 30em) {
     .footer__text {
       letter-spacing: var(--tr-tight);
-    }
-  }
-
-  /* Matches the short-viewport tightening in Contact.astro/Field.astro — the
-     credit line's own gap doesn't shrink with vh like the form's margins do. */
-  @media (max-height: 820px) {
-    .footer {
-      gap: 0.2rem;
-    }
-  }
-
-  @media (max-height: 700px) {
-    .footer {
-      gap: 0.1rem;
     }
   }
 </style>
