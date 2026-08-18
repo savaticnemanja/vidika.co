@@ -44,15 +44,16 @@ const years = copyrightYears();
     padding-block-end: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Both lines run tight, and the gap above is small, so the leading is what
-     you would actually be seeing between them: the body's 1.7 on the link and
-     1.4 here were adding some 7px of air before the gap even began. Still loose
-     enough to read on the narrow screens where the legal name wraps to two. */
+  /* With no grid gap left, this leading is the entire separation between the
+     two rows, which is why it is set here rather than left at the body's. 1.12
+     is tight for a line that wraps — and the legal name does wrap, under 30em —
+     but at --fs-xs the descenders and the caps of the next line still clear
+     each other, and the row below is quiet enough not to crowd it. */
   .footer__text {
     font-family: var(--font-display);
     font-size: var(--fs-xs);
     font-weight: 300;
-    line-height: 1.2;
+    line-height: 1.12;
     letter-spacing: var(--tr-wide);
     color: var(--bone-dim);
     text-align: center;
@@ -79,9 +80,14 @@ const years = copyrightYears();
        ascenders here is doing any work. */
     line-height: 1.05;
     letter-spacing: var(--tr-tight);
-    /* Still short of --bone-dim, so the step below the copyright is kept,
-       but no longer so far under it that the two links read as disabled. */
-    color: rgb(237 231 219 / 62%);
+    /* Below --bone-dim, and below AA for the two links at this size. Chosen
+       deliberately — this row is apparatus and was asked to recede — but worth
+       knowing what it costs: this Privacy Notice link is the only route to that
+       page anywhere on the site. The form dropped its GDPR art. 13 pointer on
+       the understanding that the footer carried it. If the contrast here is
+       ever a problem, put the pointer back on the form rather than lifting this
+       row; the two are not the same fix. */
+    color: rgb(237 231 219 / 45%);
     text-align: center;
     text-wrap: balance;
   }
