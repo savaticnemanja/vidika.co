@@ -2,7 +2,7 @@
  * vidika.co contact endpoint.
  *
  * A single Node process on loopback, fronted by nginx, that turns the form's
- * JSON POST into an email from contact@vidika.co. No framework: one route, one
+ * JSON POST into an email from studio@vidika.co. No framework: one route, one
  * verb, one job.
  *
  *   POST /api/contact   { name, email, message, elapsedMs, company? }

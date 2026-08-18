@@ -8,7 +8,7 @@ why the runtime image carries no `node_modules` at all.
 browser ──▶ nginx (host, TLS) ──▶ 127.0.0.1:8080 ──▶ container :8787
                                                           │
                                         GET  /*           ├─▶ dist/ off disk
-                                        POST /api/contact ├─▶ Resend ──▶ contact@vidika.co
+                                        POST /api/contact ├─▶ Resend ──▶ studio@vidika.co
                                         GET  /healthz     └─▶ liveness
 ```
 
@@ -29,7 +29,7 @@ It switches itself off when there is no `dist/` to serve, so the same process
 runs as a bare API against `astro dev`.
 
 **The form** (`index.mjs`) validates a submission and sends it through
-**Resend** as an email **from contact@vidika.co**, with the visitor in
+**Resend** as an email **from studio@vidika.co**, with the visitor in
 `Reply-To`. It answers in whichever shape it was asked in — JSON to the form's
 `fetch`, a rendered page to a browser that posted without JavaScript.
 
@@ -44,7 +44,7 @@ commented one in place).
 Putting the visitor in `From` is the obvious-looking move and it is what gets
 enquiries filed as spam — vidika.co's SPF and DKIM records don't authorise
 gmail.com to send as one of its users, so the message fails DMARC at the
-receiving end. So `From` is always contact@vidika.co, and the visitor's address
+receiving end. So `From` is always studio@vidika.co, and the visitor's address
 goes in `Reply-To`. Hitting reply in any client still answers them.
 
 ## Setting up mail
@@ -81,27 +81,47 @@ want, and anything mentioning a status code means mail will fail on the first
 real submission even though the site is up.
 
 The free tier is 3,000 messages a month and 100 a day — orders of magnitude
-more than a studio contact form needs, unless `MAIL_ACK=true` doubles it and
-something starts hammering the endpoint. The guards below are the backstop.
+more than a studio contact form needs. Every submission spends two of them,
+because `MAIL_ACK` is on by default and the visitor gets the branded
+acknowledgement back; set it to `false` to halve that. The guards below are
+the backstop if something starts hammering the endpoint.
 
-### 2. Receiving — contact@vidika.co
+### The acknowledgement
 
-The enquiry is addressed to contact@vidika.co, so that address needs to
+`composeAck` in `mail.mjs` is the note the visitor receives — the site's own
+navy-and-gold, the mark, the wordmark over the tagline, the message in a serif.
+It goes out **from** `studio@vidika.co` with **Reply-To** `studio@vidika.co`,
+so a visitor who simply hits reply reaches the studio rather than a dead
+no-reply address.
+
+It is built for mail clients rather than for browsers: tables instead of
+boxes, opaque colours instead of the site's translucent tokens, font stacks
+instead of the web fonts, and hand-authored line breaks — the reasoning for
+each is in the comments above the function. The mark is the one image and is
+allowed to fail; blocked images leave the wordmark, which is live text.
+
+If it ever fails to send, the enquiry is unaffected: the studio's copy goes
+first, and a failed acknowledgement is logged and swallowed rather than
+surfaced to the visitor.
+
+### 2. Receiving — studio@vidika.co
+
+The enquiry is addressed to studio@vidika.co, so that address needs to
 actually accept mail. **Cloudflare Email Routing** is free and takes a minute:
-enable it for the zone, add `contact@vidika.co` as a destination forwarding to
+enable it for the zone, add `studio@vidika.co` as a destination forwarding to
 a personal inbox, and let it add the root MX records. Replies then arrive
 wherever you already read mail, and hitting reply answers the visitor directly
 because their address is in `Reply-To`.
 
 Any real mailbox provider works too. `MAIL_TO` doesn't have to be
-contact@vidika.co — point it at an inbox that already exists and skip this step.
+studio@vidika.co — point it at an inbox that already exists and skip this step.
 
 ### 3. DMARC
 
 Once mail flows both ways, publish a policy so the domain can't be spoofed:
 
 ```
-_dmarc.vidika.co  TXT  "v=DMARC1; p=quarantine; rua=mailto:contact@vidika.co"
+_dmarc.vidika.co  TXT  "v=DMARC1; p=quarantine; rua=mailto:studio@vidika.co"
 ```
 
 ## Running it locally

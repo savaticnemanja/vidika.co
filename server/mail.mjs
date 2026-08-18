@@ -1,7 +1,7 @@
 /**
  * Message composition and delivery.
  *
- * The From address is always the site's own mailbox — contact@vidika.co —
+ * The From address is always the site's own mailbox — studio@vidika.co —
  * never the visitor's. Forging the visitor into From is what breaks SPF and
  * DMARC and lands enquiries in spam; their address goes in Reply-To instead,
  * so hitting reply in any mail client still answers them directly.
@@ -71,31 +71,164 @@ function composeEnquiry(submission, meta) {
   };
 }
 
-/** Optional courtesy note back to the visitor (MAIL_ACK=true). */
+/**
+ * The courtesy note back to the visitor (MAIL_ACK).
+ *
+ * This is the only piece of VIDIKA most enquirers will see before a person
+ * writes back, so it is built to the site's own design rather than to the
+ * generic auto-reply it replaced — the navy ground, the gold rules, the mark,
+ * the wordmark tracked wide over the tagline, the message set in a serif.
+ *
+ * Three things about mail make that a different job from building the page:
+ *
+ *   Tables, not boxes. Outlook on Windows lays HTML out with Word's engine,
+ *   which has no flexbox, no grid and no reliable div widths. Nested tables
+ *   with explicit widths are the one construction every client agrees on.
+ *
+ *   Opaque colour only. The site's palette is half translucent — --line is
+ *   gold at 22%, --bone-soft is bone at 78% — and Word drops rgba() outright,
+ *   which would leave hairlines black and body copy invisible. Every value
+ *   below is one of those tokens already composited against the ground it
+ *   sits on, so the mail matches the page without ever asking for alpha.
+ *
+ *   No web fonts. Jost and Cormorant Garamond will not load, so each is
+ *   listed first and followed by the nearest thing a mail client is likely to
+ *   have — a geometric sans, and a Garamond-cut serif — before the generic.
+ *
+ * The mark is the one image, and it is allowed to fail: clients that block
+ * images are left with the wordmark, which is live text, and the note reads
+ * exactly the same without it.
+ */
 function composeAck(submission) {
-  const { name, message } = submission;
+  const { name, email } = submission;
 
   const text = [
-    `Dear ${name},`,
+    'VIDIKA',
+    'CREATIVE ORIGINS',
     '',
-    'Thank you for reaching out to VIDIKA. Your message has arrived and we will',
-    'reply personally as soon as we can.',
+    'Thank you for reaching out.',
     '',
-    'For reference, this is what you sent us:',
-    '',
-    message.replace(/^/gm, '> '),
+    'Your message has reached VIDIKA.',
+    "Every connection can open new possibilities — we'll be in touch soon.",
     '',
     '—',
-    'VIDIKA · Creative Origins',
-    'contact@vidika.co · https://vidika.co',
+    'studio@vidika.co · https://vidika.co',
   ].join('\n');
+
+  /* The site's tokens, flattened onto the ground each one sits on. */
+  const INK = '#0a131f'; // --ink-900, the page ground
+  const CARD = '#122238'; // --ink-700, the field fill
+  const GOLD = '#b78937'; // --gold
+  const BONE = '#ede7db'; // --bone
+  const EDGE = '#4c4028'; // --line-strong, on the ground
+  const RULE = '#444138'; // --line, on the card
+  const SOFT = '#bdbcb7'; // --bone-soft, on the card
+  const DIM = '#777d83'; // the footer's quiet bone, on the card
+
+  const SANS = "'Jost','Century Gothic','Futura','Trebuchet MS',Helvetica,Arial,sans-serif";
+  const SERIF = "'Cormorant Garamond','Garamond',Georgia,'Times New Roman',serif";
+
+  /* A centred line that is letter-spaced carries that spacing after its last
+     letter too, so the glyphs sit half a track left of where they look centred.
+     Half the track back as an indent puts them where the eye expects. */
+  const tracked = (size, track, color, { caps = true, weight = '400' } = {}) =>
+    `font-family:${SANS};font-size:${size}px;font-weight:${weight};` +
+    `letter-spacing:${track}em;text-indent:${track / 2}em;color:${color};` +
+    (caps ? 'text-transform:uppercase;' : '');
+
+  const rule = `<tr><td style="padding:0;"><div style="height:1px;line-height:1px;font-size:0;background-color:${RULE};">&nbsp;</div></td></tr>`;
+
+  /* Vertical rhythm taken off the brand lockup rather than chosen here. On its
+     artboard the diamond stands 443 units, the gap under it is 119.75 and the
+     gap under the name is 53.25 — so at a 68px mark those are 18 and 8, and the
+     header stacks in the brand's own proportions instead of ones invented for
+     an email. Spacer rows rather than margins: Word ignores margin on a div. */
+  const MARK = 68;
+  const gap = (h) => `<div style="height:${h}px;line-height:${h}px;font-size:0;">&nbsp;</div>`;
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<meta name="supported-color-schemes" content="dark" />
+<title>Thank you for reaching out</title>
+</head>
+<body style="margin:0;padding:0;width:100%;background-color:${INK};">
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${INK};mso-hide:all;">Your message has reached VIDIKA. Every connection can open new possibilities — we&#39;ll be in touch soon.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${INK}" style="background-color:${INK};border-collapse:collapse;">
+<tr>
+<td align="center" style="padding:40px 16px;">
+<!--[if mso]>
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
+<![endif]-->
+<!-- Fluid, capped at 600. A fixed width here is what clips the card on a
+     phone, and phones are where most of this mail is opened; max-width alone
+     is not enough, because the width attribute would still pin it. Word is the
+     one engine that honours neither, so it gets the fixed 600 above and never
+     sees this table's own width. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;border-collapse:collapse;background-color:${CARD};border:1px solid ${EDGE};">
+<tr>
+<td style="padding:44px 32px 36px;" align="center">
+
+<img src="https://vidika.co/email-mark.png" width="${MARK}" height="${MARK}" alt="" style="display:block;width:${MARK}px;height:${MARK}px;border:0;outline:none;text-decoration:none;" />
+
+${gap(18)}
+
+<div style="${tracked(24, 0.42, GOLD, { weight: '300' })}line-height:1.2;">VIDIKA</div>
+
+${gap(8)}
+
+<div style="${tracked(10, 0.3, GOLD)}line-height:1.4;">Creative Origins</div>
+
+</td>
+</tr>
+${rule}
+<tr>
+<td style="padding:38px 32px 40px;" align="center">
+
+<div style="font-family:${SERIF};font-size:24px;line-height:1.35;color:${BONE};">Thank you for reaching out.</div>
+
+${gap(20)}
+
+<!-- Broken by hand, at the em dash where the sentence turns anyway. Left to
+     wrap, the last line landed wherever the client's serif happened to run
+     out — after "we'll" in one, orphaning "soon." in another — and there is no
+     font to measure against here, because whichever serif answers the stack is
+     the reader's and not ours. Authored breaks are the only ones that hold in
+     every client, and they cost nothing: on a phone the lines simply wrap
+     again underneath them. Nothing constrains this to a measure, because a
+     fixed inner width is a floor the card cannot shrink past. -->
+<div style="font-family:${SERIF};font-size:17px;line-height:1.7;color:${SOFT};">Your message has reached VIDIKA.<br />Every connection can open new possibilities —<br />we&#39;ll be in touch soon.</div>
+
+</td>
+</tr>
+${rule}
+<tr>
+<td style="padding:22px 32px 24px;" align="center">
+<div style="${tracked(12, 0.04, DIM, { caps: false })}line-height:1.6;"><a href="mailto:studio@vidika.co" style="color:${DIM};text-decoration:none;">studio@vidika.co</a> &middot; <a href="https://vidika.co" style="color:${DIM};text-decoration:none;">vidika.co</a></div>
+</td>
+</tr>
+</table>
+<!--[if mso]>
+</td></tr></table>
+<![endif]-->
+</td>
+</tr>
+</table>
+</body>
+</html>`;
 
   return {
     from: CONFIG.mail.from,
-    to: { name, address: submission.email },
+    to: { name, address: email },
+    /* Answers come back to the studio mailbox, not to a no-reply nobody
+       reads — a visitor who replies to this is still talking to VIDIKA. */
     replyTo: CONFIG.mail.to,
-    subject: 'Thank you for contacting VIDIKA',
+    subject: 'Thank you for reaching out',
     text,
+    html,
     headers: {
       'X-Vidika-Form': 'contact-ack',
       // Keeps out-of-office replies and mailing lists from answering back.

@@ -1,5 +1,5 @@
 ---
-import { SITE, copyrightYears } from '../site.config';
+import { CREDIT, SITE, copyrightYears } from '../site.config';
 
 const years = copyrightYears();
 ---
@@ -13,9 +13,17 @@ const years = copyrightYears();
   </p>
 
   {/* The form no longer carries the GDPR art. 13 pointer — it lives here,
-      reachable from every page. */}
-  <p class="footer__legal">
+      reachable from every page — and the build credit runs on the same line
+      after it. Both are apparatus rather than statement, which is what the
+      row's smaller, quieter setting below is saying. */}
+  <p class="footer__meta">
     <a href="/privacy-notice">Privacy Notice</a>
+    <span class="footer__sep" aria-hidden="true">·</span>
+    {/* Names the work; the studio beside it is the link. Read as one credit,
+        so nothing separates them but the same dot used above. */}
+    <span class="footer__credit">{CREDIT.label}</span>
+    <span class="footer__sep" aria-hidden="true">·</span>
+    <a href={CREDIT.href}>{CREDIT.name}</a>
   </p>
 </footer>
 
@@ -48,19 +56,50 @@ const years = copyrightYears();
     text-wrap: balance;
   }
 
-  .footer__legal {
+  /*
+   * A step below the copyright, and the step is taken in size rather than in
+   * contrast. Dimming was the obvious way to make this recede, but --bone-dim
+   * is already the dimmest bone the tokens hold at AA on this ground, and two
+   * of the three items here are links that have to stay readable. Scale does
+   * the same work without spending any of that: at 92% of the smallest step
+   * this line reads as a caption under the statement above it, while its type
+   * keeps a contrast the row above would not be ashamed of.
+   *
+   * What is dimmed is only what carries no information on its own — the two
+   * separators, and the words naming the work rather than the studio.
+   */
+  .footer__meta {
     font-family: var(--font-display);
-    font-size: var(--fs-xs);
+    font-size: calc(var(--fs-xs) * 0.92);
     font-weight: 300;
     /* Single line, so it can run at the type's own height — nothing above the
        ascenders here is doing any work. */
     line-height: 1.05;
     letter-spacing: var(--tr-tight);
-    color: var(--bone-dim);
-    opacity: 0.85;
+    /* 4.8:1 — a shade under --bone-dim, still AA at this size. */
+    color: rgb(237 231 219 / 52%);
+    text-align: center;
+    text-wrap: balance;
   }
 
-  .footer__legal a {
+  .footer__sep {
+    margin-inline: 0.45em;
+    opacity: 0.5;
+  }
+
+  /* Each item holds together, so the only place this row can break is at a
+     separator — a wrapped footer still reads as whole items rather than as
+     "Privacy" over "Notice". */
+  .footer__meta a,
+  .footer__credit {
+    white-space: nowrap;
+  }
+
+  .footer__credit {
+    opacity: 0.78;
+  }
+
+  .footer__meta a {
     color: inherit;
     text-decoration: underline;
     text-decoration-color: var(--line-strong);
@@ -70,8 +109,8 @@ const years = copyrightYears();
       text-decoration-color var(--dur-2) var(--ease-quart);
   }
 
-  .footer__legal a:hover,
-  .footer__legal a:focus-visible {
+  .footer__meta a:hover,
+  .footer__meta a:focus-visible {
     color: var(--gold-lift);
     text-decoration-color: currentColor;
   }
@@ -80,6 +119,11 @@ const years = copyrightYears();
   @media (max-width: 30em) {
     .footer__text {
       letter-spacing: var(--tr-tight);
+    }
+
+    /* Less air around the dots once the row is close to wrapping. */
+    .footer__sep {
+      margin-inline: 0.35em;
     }
   }
 </style>

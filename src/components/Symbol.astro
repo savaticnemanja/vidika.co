@@ -41,15 +41,18 @@ const { animate = true, label = 'The VIDIKA diamond mark' } = Astro.props;
 </svg>
 
 <style>
+  /* Gold unless the host says otherwise. The override is a custom property
+     rather than plain inheritance because this rule would win over an
+     inherited colour anyway — --symbol-color is the one seam a placement can
+     reach, and it needs no knowledge of the pieces below. */
   .symbol {
     width: 100%;
     height: auto;
     overflow: visible;
-    color: var(--gold);
+    color: var(--symbol-color, var(--gold));
   }
 
-  /* Inherits the colour so a host can tint the mark on hover without
-     reaching into the pieces. */
+  /* Takes the colour from the svg above, so tinting is a one-property job. */
   .symbol__piece {
     fill: currentColor;
     transform-box: fill-box;

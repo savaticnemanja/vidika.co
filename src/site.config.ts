@@ -22,7 +22,7 @@ export const SITE = {
     'VIDIKA is a creative studio where original IPs evolve into imaginative universes across media, technology, education, culture, and live experiences.',
   /** Founding year, used for the copyright range. */
   founded: 2026,
-  email: 'contact@vidika.co',
+  email: 'studio@vidika.co',
 } as const;
 
 /**
@@ -48,7 +48,7 @@ export const LEGAL = {
   /**
    * How long correspondence is kept after the last exchange. Stated in the
    * notice as a promise, so it has to match what actually happens to the
-   * contact@vidika.co mailbox.
+   * studio@vidika.co mailbox.
    */
   enquiryRetention: '24 months',
 } as const;
@@ -90,12 +90,16 @@ export const ABOUT = {
   body: 'VIDIKA is a creative studio where original IPs evolve into imaginative universes across media, technology, education, culture, and live experiences.',
   ctaLead: 'Explore our first IP',
   cta: {
-    label: 'MIMOLAND',
-    // TODO: replace with the real Mimoland destination.
+    /**
+     * Never drawn: the button carries the Mimoland lockup instead. This is the
+     * name behind it — what a screen reader announces, and what the button
+     * falls back to if the mark is ever taken out.
+     */
+    label: 'Mimoland',
     // Leave as '#' to render the button in a disabled "coming soon" state.
-    href: '#',
+    href: 'https://welcometomimoland.com',
     /** Set true once the destination is an external site. */
-    external: false,
+    external: true,
   },
 } as const;
 
@@ -105,7 +109,7 @@ export const CONTACT = {
    * Where the contact form POSTs.
    *
    * Defaults to the site's own handler in `server/` — a Node service behind
-   * nginx that emails the submission from contact@vidika.co. See server/README.md
+   * nginx that emails the submission from studio@vidika.co. See server/README.md
    * for the deployment, and set PUBLIC_CONTACT_ENDPOINT to point somewhere else
    * (a hosted form backend, a staging box) without touching the components.
    *
@@ -119,6 +123,17 @@ export const CONTACT = {
     email: { label: 'Email', max: 120 },
     message: { label: 'Message', max: 1200 },
   },
+} as const;
+
+/**
+ * The footer's build credit. Two fields because the line names the work and
+ * then names who did it — only the second half is the link, so only the second
+ * half carries a destination.
+ */
+export const CREDIT = {
+  label: 'Web Development',
+  name: 'nemanjas.dev',
+  href: 'https://nemanjas.dev',
 } as const;
 
 /** "2026" or "2026–2028" once time has passed. */

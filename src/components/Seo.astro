@@ -1,5 +1,6 @@
 ---
 import { SITE, SOCIALS } from '../site.config';
+import { contentStamped } from '../og';
 
 interface Props {
   title?: string;
@@ -18,7 +19,10 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', Astro.site).href;
-const imageUrl = new URL(image, Astro.site).href;
+/* Absolute, because every scraper reads og:image without a base to resolve
+   against, and stamped with the card's own bytes so a re-share can never be
+   served a cached copy of the previous artwork. See src/og.ts. */
+const imageUrl = new URL(contentStamped(image), Astro.site).href;
 
 const organization = {
   '@type': 'Organization',

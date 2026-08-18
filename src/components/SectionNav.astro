@@ -1,5 +1,6 @@
 ---
 import { SECTIONS } from '../site.config';
+import Symbol from './Symbol.astro';
 ---
 
 <nav class="rail" aria-label="Section">
@@ -16,6 +17,9 @@ import { SECTIONS } from '../site.config';
               <span class="dot__index">{section.index}</span>
               {section.label}
             </span>
+            <span class="dot__mark" aria-hidden="true">
+              <Symbol animate={false} label="" />
+            </span>
             <span class="dot__diamond" aria-hidden="true" />
             <span class="visually-hidden">{`${section.label} — section ${section.index} of 0${SECTIONS.length}`}</span>
           </a>
@@ -31,6 +35,40 @@ import { SECTIONS } from '../site.config';
     --dot-size: 2.75rem;
     /* And one for the track's, because its centring is measured from that. */
     --track-w: 2px;
+    /* Point-to-point width of the mark, and so of the diamond it fills into —
+       the two shapes share one envelope, set here once. Not smaller: the
+       chevrons' arms are 7.5% of the mark's width, and much under this they
+       stop resolving as separate pieces and read as a smudge. */
+    --mark-size: 1rem;
+    /* The list's own gap, named here because the track's rhythm is measured
+       off it and the two must not be able to drift apart. */
+    --rail-gap: var(--sp-6);
+
+    /* ── Track rhythm ───────────────────────────────────────────────
+       Centre to centre of two neighbouring dots. Everything drawn on the
+       track repeats at this period, and the track is exactly (n − 1) of
+       them long, so the pattern tiles it whole. */
+    --rail-pitch: calc(var(--dot-size) + var(--rail-gap));
+    /* That period cut into five, which is the whole of the geometry below:
+       the cell either side of a diamond is left empty and the three between
+       them carry one dash each. Five is what puts a 13.6px clearance around
+       the mark — just past the ring the current dot's box-shadow draws at
+       its widest — while leaving dashes long enough to read as dashes. */
+    --rail-cell: calc(var(--rail-pitch) / 5);
+    --rail-dash: calc(var(--rail-cell) * 0.55);
+    /* Where the dash starts and ends inside its cell. Centred, so a cell
+       boundary is always the middle of a gap — which is what lets the
+       clearance below cut on those boundaries without ever halving a dash. */
+    --rail-dash-lead: calc((var(--rail-cell) - var(--rail-dash)) / 2);
+    --rail-dash-tail: calc((var(--rail-cell) + var(--rail-dash)) / 2);
+    /* One cell of blank either side of every diamond centre. Written once and
+       used as the track's mask, which clips the progress fill with it. */
+    --rail-clearance: repeating-linear-gradient(
+      to bottom,
+      transparent 0 var(--rail-cell),
+      #000 var(--rail-cell) calc(var(--rail-pitch) - var(--rail-cell)),
+      transparent calc(var(--rail-pitch) - var(--rail-cell)) var(--rail-pitch)
+    );
 
     position: fixed;
     top: 50%;
@@ -46,7 +84,12 @@ import { SECTIONS } from '../site.config';
      is driven by raw scroll ratio, so the track's ends are what that ratio is
      measured against: any other length and 0 stops short of the first diamond
      while 1 overshoots the last, and the tip never lands on the mark it is
-     meant to be pointing at. */
+     meant to be pointing at.
+
+     That same length is what makes the dashes come out even. It is exactly
+     (n − 1) pitches, so the repeating patterns below tile it a whole number
+     of times, and the first and last diamond get the same half-clearance at
+     the ends of the track as the middle ones get in the body of it. */
   .rail__track {
     position: absolute;
     top: calc(var(--dot-size) / 2);
@@ -55,7 +98,30 @@ import { SECTIONS } from '../site.config';
        so changing the weight can't quietly knock it off centre. */
     right: calc(50% - var(--track-w) / 2);
     width: var(--track-w);
-    background: var(--line-bone);
+
+    /* The line is cut back from every mark rather than running under it. A
+       solid rule met each diamond edge-on and read as a spike through it;
+       broken, the rail reads as three stations on a route, which is what it
+       is. The mask is on the track and not on each layer because it clips the
+       progress fill with it — one statement of where metal may be laid, and
+       the two colours below simply obey it. */
+    mask-image: var(--rail-clearance);
+    -webkit-mask-image: var(--rail-clearance);
+
+    color: var(--line-bone);
+  }
+
+  /* One rhythm, two colours. The fill starts at the track's own top edge, so
+     its dashes are cut from the same phase as the track's and the gold lands
+     exactly on the grey it is replacing — never half a dash out of step. */
+  .rail__track,
+  .rail__progress {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 var(--rail-dash-lead),
+      currentColor var(--rail-dash-lead) var(--rail-dash-tail),
+      transparent var(--rail-dash-tail) var(--rail-cell)
+    );
   }
 
   /* --progress is written by motion.ts as the scroller moves.
@@ -75,19 +141,23 @@ import { SECTIONS } from '../site.config';
    * out-of-flow element, which is nothing, and it gives up no smoothness —
    * motion.ts already writes --progress once per animation frame, so the
    * scroll itself is the easing.
+   *
+   * The dashes are a second reason not to scale it: a scaleY would stretch
+   * them along with the fill, so the gold rhythm would drift out of step with
+   * the grey one underneath it the moment the page moved.
    */
   .rail__progress {
     position: absolute;
     inset: 0 0 auto;
     height: calc(var(--progress, 0) * 100%);
-    background: var(--gold);
+    color: var(--gold);
   }
 
   .rail__list {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-6);
+    gap: var(--rail-gap);
     padding: 0;
     margin: 0;
     list-style: none;
@@ -101,28 +171,65 @@ import { SECTIONS } from '../site.config';
     height: var(--dot-size);
   }
 
+  /* Mark and diamond are the same shape at two stages of being drawn, so they
+     are stacked in the one grid cell rather than swapped: nothing moves between
+     the states, the outline simply fills in. */
+  .dot__mark,
   .dot__diamond {
-    width: 0.5rem;
-    height: 0.5rem;
-    border: 1px solid var(--line-strong);
-    transform: rotate(45deg) scale(1);
+    grid-area: 1 / 1;
+  }
+
+  /* The brand mark itself — eight chevrons holding the corners of a diamond
+     they never close. Held back to the line gold at rest so a row of them reads
+     as structure rather than as three things all asking to be clicked. */
+  .dot__mark {
+    --symbol-color: var(--line-strong);
+
+    width: var(--mark-size);
+    transition:
+      opacity var(--dur-2) var(--ease-quart),
+      transform var(--dur-3) var(--ease-expo);
+  }
+
+  /* What the chevrons were describing, made solid. A rotated square's points
+     reach its side times √2, so the side is the envelope over √2 — derived, not
+     eyeballed, which is what keeps the fill landing exactly on the corners the
+     mark was holding. */
+  .dot__diamond {
+    width: calc(var(--mark-size) / 1.4142);
+    height: calc(var(--mark-size) / 1.4142);
+    background-color: var(--gold);
+    opacity: 0;
+    transform: rotate(45deg) scale(0.55);
     transition:
       background-color var(--dur-3) var(--ease-expo),
-      border-color var(--dur-3) var(--ease-expo),
+      opacity var(--dur-2) var(--ease-quart),
       transform var(--dur-3) var(--ease-expo),
       box-shadow var(--dur-3) var(--ease-expo);
   }
 
-  .dot:hover .dot__diamond,
-  .dot:focus-visible .dot__diamond {
-    border-color: var(--gold-lift);
-    transform: rotate(45deg) scale(1.35);
+  .dot:hover .dot__mark,
+  .dot:focus-visible .dot__mark,
+  .dot[aria-current='true'] .dot__mark {
+    opacity: 0;
+    transform: scale(0.82);
   }
 
+  .dot:hover .dot__diamond,
+  .dot:focus-visible .dot__diamond {
+    background-color: var(--gold-lift);
+    opacity: 1;
+    transform: rotate(45deg) scale(1.12);
+  }
+
+  /* Sits at the mark's own size: the current section is stated by the fill and
+     the glow, and doesn't need to out-grow a dot the pointer is merely passing
+     over. Equal specificity with the hover rule above and written after it, so
+     hovering the current dot brightens it to the lift gold without nudging its
+     size — the one dot on the rail that shouldn't move. */
   .dot[aria-current='true'] .dot__diamond {
-    background-color: var(--gold);
-    border-color: var(--gold);
-    transform: rotate(45deg) scale(1.25);
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
     box-shadow: 0 0 0 4px rgb(183 137 55 / 14%), 0 0 18px -2px rgb(183 137 55 / 80%);
   }
 

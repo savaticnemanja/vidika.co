@@ -36,10 +36,10 @@ services:
 
       # Defaults match src/site.config.ts, so a deploy that sets nothing still
       # behaves correctly.
-      MAIL_FROM: "${MAIL_FROM:-VIDIKA <contact@vidika.co>}"
-      MAIL_TO: "${MAIL_TO:-contact@vidika.co}"
+      MAIL_FROM: "${MAIL_FROM:-VIDIKA <studio@vidika.co>}"
+      MAIL_TO: "${MAIL_TO:-studio@vidika.co}"
       MAIL_SUBJECT_PREFIX: "${MAIL_SUBJECT_PREFIX:-VIDIKA enquiry}"
-      MAIL_ACK: "${MAIL_ACK:-false}"
+      MAIL_ACK: "${MAIL_ACK:-true}"
 
       # The origin allowlist. Anything not listed gets a 403 on the form.
       ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-https://vidika.co,https://www.vidika.co}"

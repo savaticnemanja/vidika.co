@@ -117,12 +117,18 @@ export const CONFIG = Object.freeze({
      * Envelope + header sender. Its domain must be verified with the sending
      * provider — Resend rejects anything else outright.
      */
-    from: str('MAIL_FROM', 'VIDIKA <contact@vidika.co>'),
+    from: str('MAIL_FROM', 'VIDIKA <studio@vidika.co>'),
     /** Where enquiries land. */
-    to: str('MAIL_TO', 'contact@vidika.co'),
+    to: str('MAIL_TO', 'studio@vidika.co'),
     subjectPrefix: str('MAIL_SUBJECT_PREFIX', 'VIDIKA enquiry'),
-    /** Opt-in courtesy auto-reply to the visitor. Off by default. */
-    ack: bool('MAIL_ACK', false),
+    /**
+     * The courtesy auto-reply to the visitor — see composeAck in mail.mjs.
+     * On by default: an enquiry that vanishes into silence is the one part of
+     * a contact form a visitor can actually feel, and the note costs a second
+     * send. Set MAIL_ACK=false to turn it off; the enquiry itself is
+     * unaffected either way, and a failed auto-reply is never surfaced.
+     */
+    ack: bool('MAIL_ACK', true),
   }),
 
   /**

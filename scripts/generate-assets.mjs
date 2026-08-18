@@ -5,7 +5,8 @@
  *
  * Outputs into public/: favicon.svg, favicon-96.png, favicon.ico,
  * apple-touch-icon.png, icon-192.png, icon-512.png, icon-maskable-512.png,
- * og.png — all of them committed, so this only runs when the artwork changes.
+ * og.png, email-mark.png — all committed, so this only runs when the artwork
+ * changes.
  *
  * The two source vectors live in brand/ beside this script, under the names
  * they carry in the brand package. They are the gold-on-transparent web cuts
@@ -81,12 +82,39 @@ async function iconSvg({ size, inset, radius, ground = true }) {
 </svg>`;
 }
 
-/** Open Graph / Twitter card: 1200×630, full lockup inside a deco double rule. */
+/**
+ * Open Graph / Twitter card: 1200×630, the full lockup inside a deco frame.
+ *
+ * Everything that carries meaning is stacked down the middle. That is not a
+ * taste: a shared link is re-cropped by whoever renders it — 2:1 on Twitter,
+ * a centre square in a chat preview, a small tile in a search result — and a
+ * centred lockup is the only composition that survives all of them. The frame
+ * is what is allowed to be cut.
+ *
+ * The four corners carry the brand's own shape rather than an ornament. The
+ * VIDIKA symbol is eight chevrons holding the corners of a diamond they never
+ * close, and the section rail on the site marks its stops with that diamond
+ * filled in; the card is pinned at its corners with the same mark. It also
+ * solves a thumbnail problem — a pair of hairlines alone all but disappears
+ * once a card is rendered 500px wide, and four points of solid gold do not.
+ */
 async function ogSvg() {
   const W = 1200;
   const H = 630;
+
+  /* The frame. Two rules 9 apart, far enough in that a 2:1 crop — 15 off the
+     top and bottom — still leaves both of them whole. */
+  const F = 30;
+  const F2 = F + 9;
+  /* Point-to-point radius of the corner diamonds, on the outer rule. */
+  const R = 7;
+
   const shapes = await shapesOf(SRC.fullLogo);
-  const transform = fitTransform(BOUNDS.fullLogo, W, H, 0.14);
+  const transform = fitTransform(BOUNDS.fullLogo, W, H, 0.135);
+
+  /** The mark's diamond, as a solid, centred on a corner of the outer rule. */
+  const diamond = (x, y) => `<path d="M${x},${y - R} L${x + R},${y} L${x},${y + R} L${x - R},${y} Z" />`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <style>.cls-1{fill:${GOLD}}</style>
   <defs>
@@ -97,8 +125,14 @@ async function ogSvg() {
   </defs>
   <rect width="${W}" height="${H}" fill="${INK}"/>
   <rect width="${W}" height="${H}" fill="url(#halo)"/>
-  <rect x="28" y="28" width="${W - 56}" height="${H - 56}" fill="none" stroke="${GOLD}" stroke-opacity="0.5" stroke-width="1.5"/>
-  <rect x="36" y="36" width="${W - 72}" height="${H - 72}" fill="none" stroke="${GOLD}" stroke-opacity="0.22" stroke-width="1"/>
+  <rect x="${F}" y="${F}" width="${W - F * 2}" height="${H - F * 2}" fill="none" stroke="${GOLD}" stroke-opacity="0.45" stroke-width="1.5"/>
+  <rect x="${F2}" y="${F2}" width="${W - F2 * 2}" height="${H - F2 * 2}" fill="none" stroke="${GOLD}" stroke-opacity="0.2" stroke-width="1"/>
+  <g fill="${GOLD}" fill-opacity="0.9">
+    ${diamond(F, F)}
+    ${diamond(W - F, F)}
+    ${diamond(F, H - F)}
+    ${diamond(W - F, H - F)}
+  </g>
   <g transform="${transform}">${shapes}</g>
 </svg>`;
 }
@@ -171,6 +205,14 @@ async function main() {
   // Maskable needs its content inside the central 80% safe zone.
   const maskableSvg = await iconSvg({ size: 512, inset: 0.26, radius: 0 });
   await writeFile(join(pub, 'icon-maskable-512.png'), await png(maskableSvg, 512));
+
+  /* The mark for the contact auto-reply. No mail client renders SVG, so the
+     one vector the rest of the site uses has to become a raster here — the
+     same cut as the favicon, transparent, at four times the 60px it is placed
+     at so it stays sharp on a retina screen. Transparent rather than on ink
+     because a few clients paint their own ground behind an image, and gold
+     holds up on either. */
+  await writeFile(join(pub, 'email-mark.png'), await png(faviconSvg, 240));
 
   // Social card.
   await sharp(Buffer.from(await ogSvg()))
