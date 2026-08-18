@@ -35,7 +35,10 @@ const years = copyrightYears();
     z-index: var(--z-content);
     display: grid;
     place-items: center;
-    gap: 0.1rem;
+    /* No explicit gap: the leading on the two rows already sets them apart
+       by more than a grid gap would, and stacking one on the other put the
+       meta row further from the statement than it reads as belonging to. */
+    gap: 0;
     min-height: var(--footer-block);
     padding-inline: var(--shell-x);
     padding-block-end: env(safe-area-inset-bottom, 0px);
@@ -76,8 +79,9 @@ const years = copyrightYears();
        ascenders here is doing any work. */
     line-height: 1.05;
     letter-spacing: var(--tr-tight);
-    /* 4.8:1 — a shade under --bone-dim, still AA at this size. */
-    color: rgb(237 231 219 / 52%);
+    /* Still short of --bone-dim, so the step below the copyright is kept,
+       but no longer so far under it that the two links read as disabled. */
+    color: rgb(237 231 219 / 62%);
     text-align: center;
     text-wrap: balance;
   }
