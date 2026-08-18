@@ -88,7 +88,10 @@
   --shell-x: clamp(1.25rem, 0.9rem + 1.5vw, 2.5rem);
   --measure: 46ch;
   --header-h: 4.5rem;
-  --footer-h: 4.5rem;
+  /* Deliberately not --header-h. The header is a bar with a lockup and a
+     control in it; the footer is two lines of small text, and matching the
+     two only bought the footer 45px of empty band around 27px of content. */
+  --footer-h: 3rem;
   /* Footer band including the home-indicator inset it pads past — what the
      last section has to give up so the footer lands inside the viewport. */
   --footer-block: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
@@ -123,7 +126,9 @@
    legal text needed more room than one, but the footer's leading has since been
    pulled in far enough that they fit the standard band. It is a floor, not a
    height, so a third line would still push the footer taller rather than
-   clipping. */
+   clipping — which is also what makes 3rem safe. The two rows measure about
+   27px together; at 4.5rem they floated in the middle of a 72px band, and the
+   space read as the footer being unfinished rather than as air. */
 
 @media (prefers-reduced-motion: reduce) {
   :root {
