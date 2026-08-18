@@ -1,0 +1,62 @@
+# vidika.co — one container, behind host nginx on 127.0.0.1:8087.
+#
+# Server-side compose, same shape as the other apps on this box: the repo is
+# checked out at ./src and built here, values come from the .env next to this
+# file, and the published port is loopback-only so nginx is the only way in.
+#
+# The repo carries its own docker-compose.yml with `build: .` for running the
+# site standalone off a laptop. This is the one the deploy hook uses; they are
+# deliberately separate files.
+#
+# There are no volumes because there is no state: no database, no uploads,
+# nothing written at runtime. Destroying and recreating this container loses
+# nothing, which is what makes `up -d --force-recreate` a safe deploy.
+
+services:
+  app:
+    build:
+      context: ./src
+      target: runner
+    image: vidika-app:local
+    container_name: vidika-app
+    restart: unless-stopped
+
+    # The 127.0.0.1 prefix is the single most important line in this file.
+    # Without it Docker publishes on 0.0.0.0 and — because it writes its own
+    # iptables rules, below the firewall — the port is reachable from the
+    # internet even when UFW says it is closed. Bound to loopback, only nginx
+    # can reach the app. 8087 is this box's next free slot after 8086 (pgadmin).
+    ports:
+      - "127.0.0.1:8087:8787"
+
+    # Mail credentials and any overrides. Everything optional defaults to the
+    # values in src/site.config.ts, so a .env holding only the API key is a
+    # complete config — see src/.env.example for the full key list.
+    env_file: .env
+
+    environment:
+      NODE_ENV: production
+
+      # `:?` rather than a default: with no key the handler falls back to
+      # printing messages instead of sending them, which is a production box
+      # silently swallowing enquiries. Better to refuse to start. This is a
+      # compose-level interpolation check against the .env above, and it is
+      # why a missing key fails here rather than three hours later in a log.
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY in /srv/vidika.co/.env}
+
+      # The origin allowlist. Anything not listed gets a 403 on the form.
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-https://vidika.co,https://www.vidika.co}"
+
+    # A static file server and one JSON route need very little. The point of
+    # the ceiling is that a runaway here cannot take down the other nine
+    # containers on the box — or sshd.
+    mem_limit: 256m
+    cpus: "1.0"
+
+    # An unbounded json-file log will eventually fill a small VPS disk, and the
+    # symptom is every container on the box failing at once.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

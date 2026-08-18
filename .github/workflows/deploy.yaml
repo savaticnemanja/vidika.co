@@ -1,0 +1,41 @@
+# Push to main → the VPS pulls, rebuilds and restarts.
+#
+# The job carries no SSH key and no registry credentials. All it does is POST
+# an HMAC-signed payload to the webhook listener on the box, which runs
+# /opt/deploy/vidika.sh as the unprivileged `deploy` user. The signature is
+# the whole of the authentication, so WEBHOOK_SECRET must match the `secret`
+# field of the "vidika" entry in /opt/deploy/hooks.json.
+#
+# Repo secret required: WEBHOOK_SECRET (already set).
+#
+# publish.yaml, next to this file, is the other half of a different strategy —
+# build the image in CI and pull it on the box. The two are alternatives; this
+# one is what the server is set up for, and it builds on the box.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Serialised, and never cancelled midway: a half-finished deploy would
+    # leave the box on a partially reset working tree.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Trigger webhook deploy
+        env:
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          PAYLOAD='{"ref":"refs/heads/main"}'
+          SIG="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | awk '{print $2}')"
+          curl -fsSL -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: $SIG" \
+            -d "$PAYLOAD" \
+            https://nemanjas.dev/hooks/vidika

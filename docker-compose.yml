@@ -1,8 +1,15 @@
-# vidika.co — one container, behind nginx on the host.
+# vidika.co — one container, standalone.
 #
-# Values come from a `.env` file sitting next to this one on the server. That
-# file is never committed and never enters the image; see .env.example for the
-# keys it needs.
+# This is the file for running the whole site off a laptop: `docker compose
+# up -d --build` and the site plus the contact handler are on :8080.
+#
+# It is NOT what production uses. The VPS has its own compose file, kept at
+# deploy/docker-compose.server.yml and installed to /srv/vidika.co/, which
+# builds from ./src and publishes on 127.0.0.1:8087 under the container
+# naming the rest of that box uses. See deploy/README.md.
+#
+# Values come from a `.env` file sitting next to this one. That file is never
+# committed and never enters the image; see .env.example for the keys it needs.
 #
 # There are no volumes because there is no state: no database, no uploads,
 # nothing written at runtime. Destroying and recreating this container loses
@@ -10,7 +17,7 @@
 
 services:
   app:
-    # Built on the box. Switch both lines to a registry path
+    # Switch both lines to a registry path
     # (`image: ghcr.io/savaticnemanja/vidika-co:latest`, no `build:`) if you
     # would rather build in CI and `docker compose pull` here — see
     # .github/workflows/publish.yaml.
