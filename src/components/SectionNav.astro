@@ -102,20 +102,13 @@ import Symbol from './Symbol.astro';
     /* The line is cut back from every mark rather than running under it. A
        solid rule met each diamond edge-on and read as a spike through it;
        broken, the rail reads as three stations on a route, which is what it
-       is. The mask is on the track and not on each layer because it clips the
-       progress fill with it — one statement of where metal may be laid, and
-       the two colours below simply obey it. */
+       is. The mask is on the track and not on the progress fill because it
+       clips the fill with it too, as a descendant of the masked box — one
+       statement of where metal may be laid. */
     mask-image: var(--rail-clearance);
     -webkit-mask-image: var(--rail-clearance);
 
     color: var(--line-bone);
-  }
-
-  /* One rhythm, two colours. The fill starts at the track's own top edge, so
-     its dashes are cut from the same phase as the track's and the gold lands
-     exactly on the grey it is replacing — never half a dash out of step. */
-  .rail__track,
-  .rail__progress {
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0 var(--rail-dash-lead),
@@ -124,7 +117,9 @@ import Symbol from './Symbol.astro';
     );
   }
 
-  /* --progress is written by motion.ts as the scroller moves.
+  /* --progress is written by motion.ts as the scroller moves. Solid, not
+   * dashed like the track underneath it — the fill is read as one continuous
+   * line of distance covered, not a rhythm to stay in step with.
    *
    * Flat brand gold, not a ramp toward --gold-lift: that ramp put the line at
    * its brightest exactly where its leading edge is, so the fill read as
@@ -141,16 +136,12 @@ import Symbol from './Symbol.astro';
    * out-of-flow element, which is nothing, and it gives up no smoothness —
    * motion.ts already writes --progress once per animation frame, so the
    * scroll itself is the easing.
-   *
-   * The dashes are a second reason not to scale it: a scaleY would stretch
-   * them along with the fill, so the gold rhythm would drift out of step with
-   * the grey one underneath it the moment the page moved.
    */
   .rail__progress {
     position: absolute;
     inset: 0 0 auto;
     height: calc(var(--progress, 0) * 100%);
-    color: var(--gold);
+    background-color: var(--gold);
   }
 
   .rail__list {
