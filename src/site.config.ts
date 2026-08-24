@@ -62,8 +62,7 @@ export const SOCIALS = [
   },
   {
     label: 'IMDb',
-    // TODO: replace with the real IMDb company/name page URL
-    href: 'https://www.imdb.com/',
+    href: 'https://www.imdb.com/title/tt44123873/',
     icon: 'imdb',
   },
   {

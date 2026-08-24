@@ -29,8 +29,8 @@ brand vectors).
 Everything that needs real data lives in **`src/site.config.ts`** — search it
 for `TODO`. Nothing else in the codebase hardcodes these values.
 
-1. **Social URLs** — LinkedIn, IMDb and Instagram currently point at
-   placeholder profiles.
+1. **Social URLs** — LinkedIn and Instagram currently point at placeholder
+   profiles. IMDb is real.
 2. **Mail** — the form posts to `/api/contact`, handled by
    [`server/`](server/README.md), which sends through Resend from
    studio@vidika.co. `vidika.co` currently has **no MX records**, so verifying
