@@ -305,16 +305,22 @@ textarea {
   width: 100%;
 }
 
-/* The closing unit: last panel + footer, snapped as one screen. The panel
-   gives up exactly the footer's band so the pair measures one viewport, and
-   its bottom padding drops the reservation the fixed footer used to need. */
+/* The closing unit: last panel + footer, snapped as one screen. The unit owns
+   the viewport height and the panel takes whatever the footer leaves, rather
+   than the panel subtracting a guessed footer band — a guess that has to be
+   re-tuned every time the footer's type, padding or margin moves, and that
+   clips the last row's underlines the moment it comes up short. */
 .scroller__end {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
 
 .scroller__end > .panel {
-  min-height: calc(100dvh - var(--footer-block));
+  flex: 1;
+  min-height: 0;
   padding-block-end: var(--sp-6);
   scroll-snap-align: none;
 }

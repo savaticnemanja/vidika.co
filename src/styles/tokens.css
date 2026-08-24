@@ -90,11 +90,20 @@
   --header-h: 4.5rem;
   /* Deliberately not --header-h. The header is a bar with a lockup and a
      control in it; the footer is two lines of small text, and matching the
-     two only bought the footer 45px of empty band around 27px of content. */
-  --footer-h: 3rem;
-  /* Footer band including the home-indicator inset it pads past — what the
-     last section has to give up so the footer lands inside the viewport. */
-  --footer-block: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
+     two only bought the footer 45px of empty band around 27px of content.
+     A floor rather than a height: the two rows measure past this on their
+     own, so the footer sizes to its type and this only stops it collapsing.
+     It is also the reservation every other panel pads out at its foot. */
+  --footer-h: 1.5rem;
+  /* Air under the footer's last row, so the meta links' underlines never sit
+     on the viewport edge. */
+  --footer-gap: 0.25rem;
+  /* Footer band including that gap and the home-indicator inset it pads past.
+     Only pages without the snap scroller (404) reserve against this; the
+     closing unit on the index measures the real footer instead. */
+  --footer-block: calc(
+    var(--footer-h) + var(--footer-gap) + env(safe-area-inset-bottom, 0px)
+  );
 
   /* ── Depth ───────────────────────────────────────────────────────── */
   --z-bg: 0;
