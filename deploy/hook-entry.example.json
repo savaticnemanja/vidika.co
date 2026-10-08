@@ -1,6 +1,6 @@
 {
   "id": "vidika",
-  "execute-command": "/opt/deploy/vidika.sh",
+  "execute-command": "/opt/deploy/vidika.co.sh",
   "command-working-directory": "/srv/vidika.co",
   "response-message": "deploying vidika.co",
   "trigger-rule": {

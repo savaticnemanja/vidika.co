@@ -19,16 +19,21 @@ port published on `0.0.0.0` is reachable even when the firewall says closed.
 
 `docker-compose.yml` at the repo root builds from `.` and is for running the
 whole site off a laptop. `deploy/docker-compose.server.yml` is the one that
-lives on the box: it builds from `./src`, uses the `vidika-app:local` /
-`vidika-app` naming the other apps on that host use, and reads `.env` from
-`/srv/vidika.co/`. They are deliberately separate; neither is generated from
-the other.
+lives on the box: it builds from `./src`, pins the compose project to
+`vidika`, uses the `vidika-app:local` / `vidika-app` naming the other apps on
+that host use, and reads `.env` from `/srv/vidika.co/`. They are deliberately
+separate; neither is generated from the other.
+
+Naming on the box: Docker names (compose project, container, image) are the
+domain minus its TLD; everything on disk (`/srv/vidika.co`, the vhost, the
+certificate, `/opt/deploy/vidika.co.sh`) is the full domain. The webhook id
+stays `vidika` — it is part of the URL the workflow calls.
 
 ## Automatic deploys
 
 Push to `main` → `.github/workflows/deploy.yaml` POSTs an HMAC-signed payload
 to `https://nemanjas.dev/hooks/vidika` → the webhook service runs
-`/opt/deploy/vidika.sh` as the unprivileged `deploy` user, which pulls,
+`/opt/deploy/vidika.co.sh` as the unprivileged `deploy` user, which pulls,
 rebuilds and recreates the container.
 
 The workflow holds no SSH key and no registry credentials; the HMAC signature
@@ -51,7 +56,7 @@ docker compose build app && docker compose up -d
 ## First-time / root-level setup
 
 `deploy/install-root.sh` does the parts needing root — the vhost, the
-`limit_req_zone`, the Cloudflare real-IP snippet, `/opt/deploy/vidika.sh` and
+`limit_req_zone`, the Cloudflare real-IP snippet, `/opt/deploy/vidika.co.sh` and
 the `hooks.json` entry. It is idempotent, backs up everything it replaces, and
 rolls the vhost back if `nginx -t` fails.
 

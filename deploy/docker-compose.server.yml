@@ -12,6 +12,7 @@
 # nothing written at runtime. Destroying and recreating this container loses
 # nothing, which is what makes `up -d --force-recreate` a safe deploy.
 
+name: vidika
 services:
   app:
     build:
@@ -25,7 +26,7 @@ services:
     # Without it Docker publishes on 0.0.0.0 and — because it writes its own
     # iptables rules, below the firewall — the port is reachable from the
     # internet even when UFW says it is closed. Bound to loopback, only nginx
-    # can reach the app. 8087 is this box's next free slot after 8086 (pgadmin).
+    # can reach the app. 8087 is this app's slot in the box's 808x loopback range.
     ports:
       - "127.0.0.1:8087:8787"
 

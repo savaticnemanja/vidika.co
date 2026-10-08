@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy hook for vidika.co — invoked by /opt/deploy/hooks.json (webhook svc,
 # runs as user `deploy`). Pulls main, rebuilds the image, restarts the stack.
-# Install to /opt/deploy/vidika.sh (owner deploy, mode 0701).
+# Install to /opt/deploy/vidika.co.sh (owner deploy, mode 0701).
 set -euo pipefail
 
 ROOT="/srv/vidika.co"

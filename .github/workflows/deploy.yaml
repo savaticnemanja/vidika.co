@@ -2,7 +2,7 @@
 #
 # The job carries no SSH key and no registry credentials. All it does is POST
 # an HMAC-signed payload to the webhook listener on the box, which runs
-# /opt/deploy/vidika.sh as the unprivileged `deploy` user. The signature is
+# /opt/deploy/vidika.co.sh as the unprivileged `deploy` user. The signature is
 # the whole of the authentication, so WEBHOOK_SECRET must match the `secret`
 # field of the "vidika" entry in /opt/deploy/hooks.json.
 #

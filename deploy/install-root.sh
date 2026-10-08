@@ -19,9 +19,9 @@ say() { printf "\n\033[1m── %s\033[0m\n" "$*"; }
 say "installing nginx snippets"
 mkdir -p /etc/nginx/snippets
 install -m 0644 -o root -g root "$SRC/cloudflare-realip.conf" /etc/nginx/snippets/cloudflare-realip.conf
-install -m 0644 -o root -g root "$SRC/vidika-ratelimit.conf"  /etc/nginx/conf.d/vidika-ratelimit.conf
+install -m 0644 -o root -g root "$SRC/vidika.co-ratelimit.conf" /etc/nginx/conf.d/vidika.co-ratelimit.conf
 echo "  /etc/nginx/snippets/cloudflare-realip.conf"
-echo "  /etc/nginx/conf.d/vidika-ratelimit.conf"
+echo "  /etc/nginx/conf.d/vidika.co-ratelimit.conf"
 
 # ── 2. the vhost, with rollback ───────────────────────────────────────
 say "installing vhost (was: static root /var/www/vidika.co)"
@@ -41,15 +41,15 @@ if nginx -t; then
 else
     echo "  FAILED — restoring previous vhost, nginx NOT reloaded" >&2
     cp -a "$BACKUP" "$VHOST"
-    rm -f /etc/nginx/conf.d/vidika-ratelimit.conf
+    rm -f /etc/nginx/conf.d/vidika.co-ratelimit.conf
     nginx -t >/dev/null 2>&1 && echo "  rollback verified" >&2
     exit 1
 fi
 
 # ── 3. deploy hook script ─────────────────────────────────────────────
-say "installing /opt/deploy/vidika.sh"
-install -m 0701 -o deploy -g deploy "$SRC/vidika.sh" /opt/deploy/vidika.sh
-ls -l /opt/deploy/vidika.sh
+say "installing /opt/deploy/vidika.co.sh"
+install -m 0701 -o deploy -g deploy "$SRC/vidika.co.sh" /opt/deploy/vidika.co.sh
+ls -l /opt/deploy/vidika.co.sh
 
 # ── 4. hooks.json entry ───────────────────────────────────────────────
 say "adding vidika entry to /opt/deploy/hooks.json"
