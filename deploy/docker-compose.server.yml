@@ -21,6 +21,8 @@ services:
     image: vidika-app:local
     container_name: vidika-app
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
 
     # The 127.0.0.1 prefix is the single most important line in this file.
     # Without it Docker publishes on 0.0.0.0 and — because it writes its own

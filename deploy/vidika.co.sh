@@ -13,8 +13,23 @@ git fetch --prune origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
 cd "$ROOT"
+# rollback: keep the running build as :previous
+for img in $(docker compose config --images | grep ':local$'); do
+  if docker image inspect "$img" >/dev/null 2>&1; then
+    docker tag "$img" "${img%:local}:previous"
+  fi
+done
 docker compose build app
-docker compose up -d --remove-orphans
+if ! docker compose up -d --remove-orphans --wait --wait-timeout 120; then
+  echo "!! stack not healthy after deploy — rolling back to :previous" >&2
+  for img in $(docker compose config --images | grep ':local$'); do
+    if docker image inspect "${img%:local}:previous" >/dev/null 2>&1; then
+      docker tag "${img%:local}:previous" "$img"
+    fi
+  done
+  docker compose up -d --remove-orphans --wait --wait-timeout 120 || true
+  exit 1
+fi
 
 # Drop the previous image layers so the disk does not creep.
 docker image prune -f
