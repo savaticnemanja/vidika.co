@@ -6,7 +6,7 @@ nginx, in the same shape as the other apps on that box.
 ```
 /srv/vidika.co/
 ├── docker-compose.yml     ← deploy/docker-compose.server.yml
-├── .env                   ← secrets; never committed, mode 0640 nemanjas:developers
+├── .env                   ← secrets; never committed, mode 0640 nemanja:developers
 ├── deploy/                ← copies of this directory
 └── src/                   ← this repo, cloned, owned by `deploy`
 ```

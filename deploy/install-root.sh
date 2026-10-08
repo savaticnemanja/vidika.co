@@ -29,7 +29,7 @@ VHOST=/etc/nginx/sites-available/vidika.co
 BACKUP="$VHOST.bak-$STAMP"
 cp -a "$VHOST" "$BACKUP"
 echo "  backup: $BACKUP"
-install -m 0644 -o nemanjas -g nemanjas "$SRC/nginx-vidika.co.conf" "$VHOST"
+install -m 0644 -o nemanja -g nemanja "$SRC/nginx-vidika.co.conf" "$VHOST"
 
 # The symlink already exists from the static setup; recreate only if missing.
 [ -L /etc/nginx/sites-enabled/vidika.co ] || ln -s "$VHOST" /etc/nginx/sites-enabled/vidika.co
